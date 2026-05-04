@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -110,10 +110,40 @@
 
     /* ── Responsive básico ── */
     @media (max-width: 600px) {
-      body { padding: 8px; }
-      .k6 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      body { padding: 6px; }
+      .wrapper { border-radius: 8px; }
+      .k6 { grid-template-columns: repeat(2,minmax(0,1fr)); gap:8px; }
       .g2 { grid-template-columns: 1fr; }
       .fg3 { grid-template-columns: 1fr 1fr; }
+      .nav { gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding: 0 12px; }
+      .nav button { font-size: 12px; padding: 10px 10px; white-space: nowrap; flex-shrink: 0; }
+      .hdr { padding: 12px; }
+      .hdr p:first-child { font-size: 13px; }
+      .hdr p:last-child { font-size: 10px; }
+      .cd { padding: 10px; }
+      .ct { font-size: 13px; }
+      .cs { font-size: 10px; }
+      .kv { font-size: 22px; }
+      .mc { flex-direction: column; gap: 8px; }
+      .mi { width: 28px; height: 28px; font-size: 13px; flex-shrink: 0; }
+      /* Meta grid — 2 columnas en móvil */
+      #meta_grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+      /* Formularios */
+      .af select, .af input { font-size: 14px; padding: 8px 10px; }
+      /* Tablas scroll */
+      .tw { font-size: 11px; }
+      td, th { padding: 6px 8px; }
+      /* Scatter y gráficas altas */
+      #c_scat { height: 220px !important; }
+      /* Badges inline → stack */
+      .badge { font-size: 9px; padding: 1px 5px; }
+      /* Buttons en mejoras */
+      .mc > div > div:first-child { flex-wrap: wrap; }
+    }
+    @media (max-width: 400px) {
+      .k6 { grid-template-columns: 1fr 1fr; }
+      #meta_grid { grid-template-columns: 1fr !important; }
+      .nav button { font-size: 11px; padding: 10px 8px; }
     }
   </style>
 </head>
@@ -915,25 +945,31 @@ function renderCompCharts(){
   const vcMx=cargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
   const vcTg=cargaVehs.map(v=>TARGETS[v]);
 
-  const varLabelPlugin={
-    id:'varLabel',
+  // Plugin para mostrar valores min/avg/max dentro/encima de las barras
+  const rangeLabelsPlugin={
+    id:'rangeLabels',
     afterDatasetsDraw(chart){
       const {ctx}=chart;
-      [0,1,2].forEach(di=>{
-        if(chart.data.datasets[di]?.type==='line')return;
-        const meta=chart.getDatasetMeta(di);
-        const labels=['min','avg','máx'];
-        const lc=['rgba(112,32,130,0.6)','#702082','rgba(112,32,130,0.55)'];
-        meta.data.forEach((bar,i)=>{
-          const v=chart.data.datasets[di].data[i];
-          if(!v)return;
-          ctx.save();
-          ctx.font=`${di===1?'bold ':' '}10px -apple-system,sans-serif`;
-          ctx.fillStyle=di===1?'white':'#333';
-          ctx.textAlign='center'; ctx.textBaseline='middle';
-          if(bar.height>14) ctx.fillText(v,bar.x,bar.y+bar.height/2);
-          ctx.restore();
-        });
+      // Dataset 0 = rango (flotante), Dataset 2 = promedio (línea)
+      const metaRange=chart.getDatasetMeta(0);
+      chart.data.datasets[0].data.forEach((val,i)=>{
+        const bar=metaRange.data[i]; if(!bar)return;
+        const minV=chart.data.datasets[0].data[i][0];
+        const maxV=chart.data.datasets[0].data[i][1];
+        const avgV=chart.data.datasets[1].data[i];
+        ctx.save();
+        ctx.textAlign='center'; ctx.textBaseline='bottom';
+        // Min label
+        ctx.font='bold 10px -apple-system,sans-serif'; ctx.fillStyle='#702082';
+        ctx.fillText(`min ${minV}`, bar.x, chart.scales.y.getPixelForValue(minV)-2);
+        // Max label
+        ctx.textBaseline='top';
+        ctx.fillText(`máx ${maxV}`, bar.x, chart.scales.y.getPixelForValue(maxV)+2);
+        // Avg label
+        ctx.textBaseline='middle'; ctx.fillStyle='white';
+        ctx.font='bold 11px -apple-system,sans-serif';
+        ctx.fillText(`avg ${avgV}`, bar.x, chart.scales.y.getPixelForValue(avgV));
+        ctx.restore();
       });
     }
   };
@@ -941,15 +977,27 @@ function renderCompCharts(){
   CI['var_carga']=new Chart(document.getElementById('c_var_carga'),{
     type:'bar',
     data:{labels:cargaVehs,datasets:[
-      {label:'Mínimo',data:vcMn,backgroundColor:'rgba(112,32,130,0.18)',borderColor:'rgba(112,32,130,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Promedio',data:vcAv,backgroundColor:'rgba(112,32,130,0.75)',borderColor:'#702082',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Máximo',data:vcMx.map((v,i)=>+(v-vcAv[i]).toFixed(1)),backgroundColor:'rgba(112,32,130,0.22)',borderColor:'rgba(112,32,130,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Meta',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+      {label:'Rango min–máx',data:vcMn.map((m,i)=>[m,vcMx[i]]),backgroundColor:'rgba(112,32,130,0.18)',borderColor:'rgba(112,32,130,0.4)',borderWidth:1.5,borderRadius:4,borderSkipped:false},
+      {label:'Promedio',data:vcAv,type:'line',borderColor:'#702082',borderWidth:3,pointRadius:8,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0,z:10},
+      {label:'Meta',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
-      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}}}
+    plugins:[rangeLabelsPlugin],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,bottom:4}},
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+          title:ctx=>ctx[0].label,
+          label:ctx=>{
+            if(ctx.datasetIndex===0) return[` Mínimo: ${vcMn[ctx.dataIndex]} min`,` Máximo: ${vcMx[ctx.dataIndex]} min`,` Rango: ${(vcMx[ctx.dataIndex]-vcMn[ctx.dataIndex]).toFixed(1)} min`];
+            if(ctx.datasetIndex===1) return` Promedio: ${ctx.raw} min`;
+            return` Meta: ${ctx.raw} min`;
+          }
+        }}
+      },
+      scales:{
+        y:{beginAtZero:false,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:11,weight:'500'}},grid:{display:false}}
+      }
     }
   });
 
@@ -959,18 +1007,55 @@ function renderCompCharts(){
   const vdMx=descargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
   const vdTg=descargaVehs.map(v=>TARGETS[v]);
 
+  const rangeLabelsPluginDesc={
+    id:'rangeLabelsDesc',
+    afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      const metaRange=chart.getDatasetMeta(0);
+      chart.data.datasets[0].data.forEach((val,i)=>{
+        const bar=metaRange.data[i]; if(!bar)return;
+        const minV=chart.data.datasets[0].data[i][0];
+        const maxV=chart.data.datasets[0].data[i][1];
+        const avgV=chart.data.datasets[1].data[i];
+        ctx.save();
+        ctx.textAlign='center';
+        ctx.font='bold 10px -apple-system,sans-serif'; ctx.fillStyle='#EB008B';
+        ctx.textBaseline='bottom';
+        ctx.fillText(`min ${minV}`, bar.x, chart.scales.y.getPixelForValue(minV)-2);
+        ctx.textBaseline='top';
+        ctx.fillText(`máx ${maxV}`, bar.x, chart.scales.y.getPixelForValue(maxV)+2);
+        ctx.textBaseline='middle'; ctx.fillStyle='white';
+        ctx.font='bold 11px -apple-system,sans-serif';
+        ctx.fillText(`avg ${avgV}`, bar.x, chart.scales.y.getPixelForValue(avgV));
+        ctx.restore();
+      });
+    }
+  };
+
   CI['var_desc']=new Chart(document.getElementById('c_var_desc'),{
     type:'bar',
     data:{labels:descargaVehs,datasets:[
-      {label:'Mínimo',data:vdMn,backgroundColor:'rgba(235,0,139,0.15)',borderColor:'rgba(235,0,139,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Promedio',data:vdAv,backgroundColor:'rgba(235,0,139,0.75)',borderColor:'#EB008B',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Máximo',data:vdMx.map((v,i)=>+(v-vdAv[i]).toFixed(1)),backgroundColor:'rgba(235,0,139,0.2)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Meta',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+      {label:'Rango min–máx',data:vdMn.map((m,i)=>[m,vdMx[i]]),backgroundColor:'rgba(235,0,139,0.15)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1.5,borderRadius:4,borderSkipped:false},
+      {label:'Promedio',data:vdAv,type:'line',borderColor:'#EB008B',borderWidth:3,pointRadius:8,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0,z:10},
+      {label:'Meta',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
-      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:9},maxRotation:15},grid:{display:false}}}
+    plugins:[rangeLabelsPluginDesc],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,bottom:4}},
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+          title:ctx=>ctx[0].label,
+          label:ctx=>{
+            if(ctx.datasetIndex===0) return[` Mínimo: ${vdMn[ctx.dataIndex]} min`,` Máximo: ${vdMx[ctx.dataIndex]} min`,` Rango: ${(vdMx[ctx.dataIndex]-vdMn[ctx.dataIndex]).toFixed(1)} min`];
+            if(ctx.datasetIndex===1) return` Promedio: ${ctx.raw} min`;
+            return` Meta: ${ctx.raw} min`;
+          }
+        }}
+      },
+      scales:{
+        y:{beginAtZero:false,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},maxRotation:15},grid:{display:false}}
+      }
     }
   });
 
@@ -1618,3 +1703,4 @@ initFirebase();
 </script>
 </body>
 </html>
+
