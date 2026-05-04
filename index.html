@@ -778,14 +778,12 @@ function renderDashCharts(){
   const sems=[...new Set(D.map(r=>r.sem))].sort();
   const t10=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
   const t54=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tF26=sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
 
   CI['trend']=new Chart(document.getElementById('c_trend'),{
     type:'line',
     data:{labels:sems,datasets:[
       {label:'Camión 10-12t',data:t10,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.07)',tension:0.3,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:1.5,fill:true,spanGaps:false},
       {label:'Camión 5.4t',data:t54,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[6,3],fill:true,spanGaps:false},
-      {label:'Furgón 26 tar.',data:tF26,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#378ADD',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[3,3],fill:false,spanGaps:false},
     ]},
     options:{
       responsive:true,maintainAspectRatio:false,
@@ -1620,4 +1618,3 @@ initFirebase();
 </script>
 </body>
 </html>
-
