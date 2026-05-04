@@ -421,71 +421,9 @@
         <p style="font-weight:500;font-size:14px;">Plan de mejoras operacionales — metodología Lean</p>
         <p style="font-size:11px;opacity:0.7;margin-top:3px;">Basado en análisis de tiempos registrados en el CD · Ordenado por impacto y prioridad</p>
       </div>
-      <button onclick="showAiPanel()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:white;padding:8px 14px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap;">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Zm-1-5h2v2h-2zm0-8h2v6h-2z" fill="white"/></svg>
-        🤖 Análisis con IA
-      </button>
     </div>
   </div>
 
-  <!-- Panel de Análisis IA -->
-  <div id="ai_panel" style="display:none;margin-bottom:14px;">
-    <!-- Setup de API Key -->
-    <div id="ai_setup" style="background:rgba(112,32,130,0.04);border:1.5px dashed rgba(112,32,130,0.3);border-radius:10px;padding:16px;margin-bottom:12px;">
-      <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;">
-          <p style="font-weight:500;font-size:13px;color:#702082;margin-bottom:4px;">🔑 API Key de Anthropic (Claude)</p>
-          <p style="font-size:11px;color:#6e6e73;margin-bottom:10px;">Obtén tu clave en <strong>console.anthropic.com</strong> → API Keys. Se guarda solo en esta sesión.</p>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="password" id="ai_key_input" placeholder="sk-ant-api03-..." style="flex:1;min-width:180px;padding:8px 11px;border:1.5px solid #e5e5ea;border-radius:7px;font-size:12px;font-family:inherit;outline:none;">
-            <button onclick="saveApiKey()" style="background:#702082;color:white;border:none;padding:8px 14px;border-radius:7px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;white-space:nowrap;">Guardar clave</button>
-          </div>
-          <p id="ai_key_status" style="font-size:11px;margin-top:6px;color:#aeaeb2;">Sin clave configurada</p>
-        </div>
-        <div style="background:rgba(255,199,44,0.1);border:1px solid rgba(255,199,44,0.4);border-radius:8px;padding:10px 12px;font-size:11px;color:#7a5c00;max-width:220px;line-height:1.5;">
-          <strong>🔒 Privacidad:</strong> La clave NO se guarda en Firebase ni en el archivo. Solo existe en memoria mientras el navegador esté abierto.
-        </div>
-      </div>
-    </div>
-
-    <!-- Botones de análisis -->
-    <div id="ai_actions" style="display:none;margin-bottom:12px;">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <button onclick="analyzeWithAI('resumen')" style="background:#702082;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;">
-          📊 Resumen ejecutivo para gerencia
-        </button>
-        <button onclick="analyzeWithAI('prioridades')" style="background:#EB008B;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;">
-          🎯 Top prioridades esta semana
-        </button>
-        <button onclick="analyzeWithAI('proveedores')" style="background:#378ADD;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;">
-          🚛 Análisis por proveedor
-        </button>
-        <button onclick="analyzeWithAI('sop')" style="background:#1D9E75;color:white;border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;">
-          📋 Recomendaciones SOP
-        </button>
-        <span style="margin-left:auto;font-size:11px;color:#aeaeb2;" id="ai_key_badge"></span>
-      </div>
-    </div>
-
-    <!-- Resultado de IA -->
-    <div id="ai_result" style="display:none;background:white;border:1px solid rgba(112,32,130,0.2);border-radius:10px;padding:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="background:#702082;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;">🤖</div>
-          <div>
-            <p style="font-weight:500;font-size:13px;color:#702082;" id="ai_result_title">Análisis IA</p>
-            <p style="font-size:10px;color:#aeaeb2;" id="ai_result_meta">—</p>
-          </div>
-        </div>
-        <button onclick="document.getElementById('ai_result').style.display='none'" style="background:none;border:none;cursor:pointer;color:#aeaeb2;font-size:18px;padding:2px 6px;">×</button>
-      </div>
-      <div id="ai_result_body" style="font-size:13px;color:#1d1d1f;line-height:1.7;white-space:pre-wrap;"></div>
-      <div id="ai_loading" style="display:none;text-align:center;padding:24px;">
-        <div style="width:32px;height:32px;border:3px solid #e5e5ea;border-top-color:#702082;border-radius:50%;animation:spin 0.75s linear infinite;display:inline-block;"></div>
-        <p style="font-size:12px;color:#702082;margin-top:10px;" id="ai_loading_text">Analizando datos operacionales...</p>
-      </div>
-    </div>
-  </div>
 
   <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;">
     <div style="background:rgba(192,57,43,0.08);border:0.5px solid rgba(192,57,43,0.2);border-radius:var(--border-radius-md);padding:12px;text-align:center;"><p style="font-size:20px;font-weight:500;color:#C0392B;" id="ca">--</p><p style="font-size:11px;color:#C0392B;">Prioridad alta</p></div>
@@ -744,150 +682,195 @@ function rk(){
 function renderDashCharts(){
   xc('rank');xc('trend');xc('donut');
 
-  const vehs=[...ALL_VEHS];
-  const avgs=vehs.map(v=>+av(getVehData(v)).toFixed(1));
-  const pairs=vehs.map((v,i)=>({v,a:avgs[i],tgt:TARGETS[v]})).sort((a,b)=>a.a-b.a);
-  const sortedLabels=pairs.map(p=>p.v);
-  const sortedAvgs=pairs.map(p=>p.a);
-  const barColors=pairs.map(p=>p.a<=p.tgt?'rgba(39,174,96,0.82)':p.a<=p.tgt*1.3?'rgba(243,156,18,0.82)':'rgba(231,76,60,0.82)');
+  const pairs=[...ALL_VEHS].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
+  const barColors=pairs.map(p=>p.a<=p.tgt?'rgba(39,174,96,0.85)':p.a<=p.tgt*1.3?'rgba(243,156,18,0.85)':'rgba(231,76,60,0.85)');
   const borderColors=pairs.map(p=>p.a<=p.tgt?'#27AE60':p.a<=p.tgt*1.3?'#F39C12':'#E74C3C');
 
-  // Plugin para etiquetas de valor + ícono de estado al final de cada barra
+  // Plugin: value labels + gap label + status icon
   const rankLabelPlugin={
     id:'rankLabel',
     afterDatasetsDraw(chart){
       const {ctx,scales:{x,y}}=chart;
       const ds0=chart.getDatasetMeta(0);
       pairs.forEach((p,i)=>{
-        const bar=ds0.data[i];
-        if(!bar)return;
-        const icon=p.a<=p.tgt?'✔':p.a<=p.tgt*1.3?'⚠':'✗';
+        const bar=ds0.data[i]; if(!bar)return;
+        const icon=p.a<=p.tgt?'✔':p.a<=p.tgt*1.3?'▲':'✗';
         const iconColor=p.a<=p.tgt?'#27AE60':p.a<=p.tgt*1.3?'#E67E22':'#E74C3C';
-        const valStr=`${p.a} min`;
-        const gapStr=p.a<=p.tgt?` (−${(p.tgt-p.a).toFixed(1)} vs meta)`
-                                 :` (+${(p.a-p.tgt).toFixed(1)} sobre meta)`;
+        const gapAbs=(p.a-p.tgt).toFixed(1);
+        const gapStr=p.a<=p.tgt?`−${Math.abs(gapAbs)} min`:`+${gapAbs} min`;
         ctx.save();
-        // Valor numérico
-        ctx.font='bold 11px -apple-system,BlinkMacSystemFont,sans-serif';
-        ctx.fillStyle='#1d1d1f';
-        ctx.textAlign='left';
-        ctx.textBaseline='middle';
-        ctx.fillText(valStr, bar.x+6, bar.y);
-        // Brecha
+        ctx.font='bold 12px -apple-system,BlinkMacSystemFont,sans-serif';
+        ctx.fillStyle='#1d1d1f'; ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(`${p.a} min`, bar.x+7, bar.y);
         ctx.font='10px -apple-system,BlinkMacSystemFont,sans-serif';
         ctx.fillStyle=iconColor;
-        const valW=ctx.measureText(valStr).width;
-        ctx.fillText(gapStr, bar.x+6+valW+2, bar.y);
-        // Ícono al inicio de la barra
-        ctx.font='bold 11px -apple-system,sans-serif';
-        ctx.fillStyle=iconColor;
-        ctx.textAlign='right';
-        ctx.fillText(icon, bar.x-4, bar.y);
+        const vw=ctx.measureText(`${p.a} min`).width;
+        ctx.fillText(`(${gapStr} vs meta)`, bar.x+7+vw+4, bar.y);
+        ctx.font='bold 12px -apple-system,sans-serif';
+        ctx.fillStyle=iconColor; ctx.textAlign='right';
+        ctx.fillText(icon, bar.x-5, bar.y);
         ctx.restore();
       });
     }
   };
 
+  // Plugin: center count label on donut
+  const donutCenterPlugin={
+    id:'donutCenter',
+    beforeDraw(chart){
+      const {ctx,chartArea:{top,bottom,left,right}}=chart;
+      const cx=(left+right)/2, cy=(top+bottom)/2;
+      ctx.save();
+      ctx.font='bold 22px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.fillStyle='#1d1d1f'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(D.length, cx, cy-8);
+      ctx.font='11px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.fillStyle='#6e6e73';
+      ctx.fillText('registros', cx, cy+12);
+      ctx.restore();
+    }
+  };
+
   CI['rank']=new Chart(document.getElementById('c_rank'),{
     type:'bar',
-    data:{
-      labels:sortedLabels,
-      datasets:[
-        {label:'Tiempo promedio',data:sortedAvgs,backgroundColor:barColors,borderColor:borderColors,borderWidth:1.5,borderRadius:5},
-        {label:'Meta objetivo',data:pairs.map(p=>p.tgt),type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[7,4],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:1.5,fill:false,tension:0}
-      ]
-    },
+    data:{labels:pairs.map(p=>p.v),datasets:[
+      {label:'Tiempo promedio',data:pairs.map(p=>p.a),backgroundColor:barColors,borderColor:borderColors,borderWidth:1.5,borderRadius:6,borderSkipped:false},
+      {label:'Meta',data:pairs.map(p=>p.tgt),type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[8,4],pointRadius:6,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+    ]},
     plugins:[rankLabelPlugin],
     options:{
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      layout:{padding:{right:160}},
+      layout:{padding:{right:180,top:4,bottom:4}},
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+          title:ctx=>ctx[0].label,
           label:ctx=>{
-            if(ctx.datasetIndex===0){const p=pairs[ctx.dataIndex];return ` Actual: ${ctx.raw} min | Meta: ${p.tgt} min | ${ctx.raw<=p.tgt?'✔ En meta':'⚠ +'+((ctx.raw-p.tgt)).toFixed(1)+' min sobre meta'}`;}
+            if(ctx.datasetIndex===0){const p=pairs[ctx.dataIndex];return[` Promedio actual: ${ctx.raw} min`,` Meta objetivo:   ${p.tgt} min`,` Registros:       ${p.cnt}`,` ${ctx.raw<=p.tgt?'✔ Dentro de meta':'⚠ '+((ctx.raw-p.tgt)/p.tgt*100).toFixed(0)+'% sobre meta'}`];}
             return ` Meta: ${ctx.raw} min`;
           }
         }}
       },
       scales:{
-        x:{beginAtZero:true,max:Math.ceil(Math.max(...sortedAvgs)*1.15/5)*5,title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}},
-        y:{ticks:{font:{size:11,weight:'500'}}}
+        x:{beginAtZero:true,max:Math.ceil(Math.max(...pairs.map(p=>p.a))*1.18/5)*5,
+           title:{display:true,text:'Minutos',font:{size:11},color:'#6e6e73'},
+           grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},
+        y:{ticks:{font:{size:11,weight:'500'}},grid:{display:false}}
       }
     }
   });
 
-  // ── Notas automáticas basadas en data real ──
+  // ── Notas automáticas ──
   const notaEl=document.getElementById('meta_nota');
   const enMeta=pairs.filter(p=>p.a<=p.tgt);
   const atencion=pairs.filter(p=>p.a>p.tgt&&p.a<=p.tgt*1.3);
   const critico=pairs.filter(p=>p.a>p.tgt*1.3);
-  const mejorOp=pairs[0];
-  const peorOp=pairs[pairs.length-1];
-  const allT=D.map(r=>r.t);
-  const promGeneral=+av(allT).toFixed(1);
-
+  const promGeneral=+av(D.map(r=>r.t)).toFixed(1);
   let notas=[];
-  // Resumen general
-  notas.push(`📊 <strong>Resumen:</strong> ${enMeta.length} de ${pairs.length} operaciones están dentro de meta. ${critico.length>0?`<span style="color:#E74C3C;font-weight:600;">${critico.length} operación${critico.length>1?'es':''} crítica${critico.length>1?'s':''}.</span>`:'Sin operaciones críticas.'}`);
-  // Mejor operación
-  notas.push(`✅ <strong>Mejor operación:</strong> ${mejorOp.v} — ${mejorOp.a} min promedio, ${mejorOp.a<=mejorOp.tgt?`<span style="color:#27AE60;">${(mejorOp.tgt-mejorOp.a).toFixed(1)} min por debajo de su meta (${mejorOp.tgt} min)</span>`:`en atención`}. Operación bien controlada.`);
-  // Operaciones críticas
-  critico.forEach(p=>{
-    const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);
-    const cnt=getVehData(p.v).length;
-    notas.push(`🔴 <strong>${p.v}:</strong> ${p.a} min promedio vs meta de ${p.tgt} min (<span style="color:#E74C3C;font-weight:600;">+${pct}% sobre meta</span>). ${cnt} registros — revisar SOP y dotación. Acción inmediata recomendada.`);
-  });
-  // Operaciones en atención
-  atencion.forEach(p=>{
-    const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);
-    notas.push(`⚠ <strong>${p.v}:</strong> ${p.a} min vs meta ${p.tgt} min (+${pct}%). Con ajustes menores (dotación o secuencia) puede estar en meta esta semana.`);
-  });
-  // Promedio general
-  notas.push(`📈 <strong>Promedio general del CD:</strong> ${promGeneral} min por operación. Total de registros analizados: <strong>${D.length}</strong>.`);
-  notaEl.innerHTML=notas.map(n=>`<div style="padding:3px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);">${n}</div>`).join('');
+  notas.push(`📊 <strong>Resumen:</strong> ${enMeta.length} de ${pairs.length} operaciones dentro de meta. ${critico.length>0?`<span style="color:#E74C3C;font-weight:600;">${critico.length} operación${critico.length>1?'es':''} crítica${critico.length>1?'s':''}.</span>`:'<span style="color:#27AE60;">Sin operaciones críticas.</span>'}`);
+  notas.push(`✅ <strong>Mejor operación:</strong> ${pairs[0].v} — ${pairs[0].a} min promedio, ${pairs[0].a<=pairs[0].tgt?`<span style="color:#27AE60;">${(pairs[0].tgt-pairs[0].a).toFixed(1)} min por debajo de su meta (${pairs[0].tgt} min)</span>`:'en atención'}.`);
+  critico.forEach(p=>{const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);notas.push(`🔴 <strong>${p.v}:</strong> ${p.a} min vs meta ${p.tgt} min (<span style="color:#E74C3C;font-weight:600;">+${pct}%</span>). ${p.cnt} registros — revisar SOP y dotación.`);});
+  atencion.forEach(p=>{const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);notas.push(`⚠ <strong>${p.v}:</strong> ${p.a} min vs meta ${p.tgt} min (+${pct}%). Ajuste menor puede ponerla en meta.`);});
+  notas.push(`📈 <strong>Promedio general:</strong> ${promGeneral} min · <strong>${D.length}</strong> registros totales.`);
+  notaEl.innerHTML=notas.map(n=>`<div style="padding:4px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);line-height:1.5;">${n}</div>`).join('');
 
+  // ── Tendencia semanal — CARGA y DESCARGA ──
   const sems=[...new Set(D.map(r=>r.sem))].sort();
-  const t1=sems.map(s=>{const t=D.filter(r=>r.tipo==='Carga'&&r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const t2=sems.map(s=>{const t=D.filter(r=>r.tipo==='Carga'&&r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const t10=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const t54=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tF26=sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+
   CI['trend']=new Chart(document.getElementById('c_trend'),{
     type:'line',
     data:{labels:sems,datasets:[
-      {label:'10-12t',data:t1,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.08)',tension:0.35,pointRadius:5,pointBackgroundColor:'#702082',fill:true,spanGaps:false},
-      {label:'5.4t',data:t2,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.05)',tension:0.35,pointRadius:5,pointBackgroundColor:'#EB008B',borderDash:[6,3],fill:true,spanGaps:false}
+      {label:'Camión 10-12t',data:t10,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.07)',tension:0.3,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:1.5,fill:true,spanGaps:false},
+      {label:'Camión 5.4t',data:t54,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[6,3],fill:true,spanGaps:false},
+      {label:'Furgón 26 tar.',data:tF26,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#378ADD',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[3,3],fill:false,spanGaps:false},
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:11}}},x:{ticks:{font:{size:11},autoSkip:false,maxRotation:30}}}}
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+      }
+    }
   });
 
+  // ── Donut con centro ──
   const nCarga=D.filter(r=>r.tipo==='Carga').length;
   const nDesc=D.filter(r=>r.tipo==='Descarga').length;
   document.getElementById('leg_donut').innerHTML=`
     <span><span class="lsq" style="background:#702082;"></span>Carga (${nCarga})</span>
-    <span><span class="lsq" style="background:#EB008B;"></span>Descarga (${nDesc})</span>
-  `;
+    <span><span class="lsq" style="background:#EB008B;"></span>Descarga (${nDesc})</span>`;
   CI['donut']=new Chart(document.getElementById('c_donut'),{
     type:'doughnut',
-    data:{labels:['Carga','Descarga'],datasets:[{data:[nCarga,nDesc],backgroundColor:['#702082','#EB008B'],borderWidth:0,hoverOffset:4}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} ops (${Math.round(ctx.raw/(nCarga+nDesc)*100)}%)`}}}}
+    data:{labels:['Carga','Descarga'],datasets:[{data:[nCarga,nDesc],backgroundColor:['#702082','#EB008B'],borderWidth:3,borderColor:'white',hoverOffset:6}]},
+    plugins:[donutCenterPlugin],
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} ops (${Math.round(ctx.raw/(nCarga+nDesc)*100)}%)`}}}
+    }
   });
 }
 
 function renderCompCharts(){
   xc('var');xc('var_carga');xc('var_desc');xc('scat');xc('lvi');xc('cump');xc('comp_gen');
 
-  // ── Insight ──
   const r54=mx(getVehData('Camión 5.4t'))-mn(getVehData('Camión 5.4t'));
   const avgCarga=+av([...vc].flatMap(v=>getVehData(v))).toFixed(1);
   const avgDesc=+av([...vd].flatMap(v=>getVehData(v))).toFixed(1);
-  document.getElementById('insight_var').innerHTML=`<strong>Hallazgo clave:</strong> Promedio de <strong>CARGA = ${avgCarga} min</strong> vs <strong>DESCARGA = ${avgDesc} min</strong>. Camión 5.4t presenta la mayor variabilidad del CD con un rango de <strong>${r54.toFixed(1)} min</strong> (${(r54/av(getVehData('Camión 5.4t'))*100).toFixed(0)}% del promedio). Camión pallets es la operación más consistente y eficiente del CD.`;
+  document.getElementById('insight_var').innerHTML=`<strong>Hallazgo clave:</strong> Promedio <strong>CARGA = ${avgCarga} min</strong> vs <strong>DESCARGA = ${avgDesc} min</strong>. Camión 5.4t tiene la mayor variabilidad del CD con un rango de <strong>${r54.toFixed(1)} min</strong> (${(r54/av(getVehData('Camión 5.4t'))*100).toFixed(0)}% del promedio). Camión pallets es la operación más eficiente y consistente.`;
 
-  // ── Gráfica comparativa general Carga vs Descarga ──
-  const cargaVehs=[...vc];
-  const descargaVehs=[...vd];
+  // ── Plugin para etiquetas de valor sobre barras ──
+  const valueLabelPlugin={
+    id:'valueLabel',
+    afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      chart.data.datasets.forEach((ds,di)=>{
+        if(ds.type==='line')return;
+        const meta=chart.getDatasetMeta(di);
+        meta.data.forEach((bar,i)=>{
+          const val=ds.data[i];
+          if(val==null||isNaN(val)||val===0)return;
+          ctx.save();
+          ctx.font='bold 10px -apple-system,BlinkMacSystemFont,sans-serif';
+          ctx.fillStyle='#1d1d1f'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+          ctx.fillText(`${val}`, bar.x, bar.y-3);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  const valueLabelHorizPlugin={
+    id:'valueLabelH',
+    afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      chart.data.datasets.forEach((ds,di)=>{
+        if(ds.type==='line')return;
+        const meta=chart.getDatasetMeta(di);
+        meta.data.forEach((bar,i)=>{
+          const val=ds.data[i];
+          if(val==null||isNaN(val)||val===0)return;
+          ctx.save();
+          ctx.font='bold 10px -apple-system,BlinkMacSystemFont,sans-serif';
+          ctx.fillStyle='#1d1d1f'; ctx.textAlign='left'; ctx.textBaseline='middle';
+          ctx.fillText(`${val}%`, bar.x+4, bar.y);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  // ── Comparativa general CARGA vs DESCARGA ──
+  const cargaVehs=[...vc], descargaVehs=[...vd];
   const allOrdered=[...cargaVehs,...descargaVehs];
   const compAvgs=allOrdered.map(v=>+av(getVehData(v)).toFixed(1));
   const compTgts=allOrdered.map(v=>TARGETS[v]);
-  const compColors=allOrdered.map((v,i)=>i<cargaVehs.length?'rgba(112,32,130,0.78)':'rgba(235,0,139,0.78)');
+  const compColors=allOrdered.map((v,i)=>i<cargaVehs.length?'rgba(112,32,130,0.80)':'rgba(235,0,139,0.80)');
   const compBorders=allOrdered.map((v,i)=>i<cargaVehs.length?'#702082':'#EB008B');
 
   const dividerPlugin={
@@ -895,157 +878,217 @@ function renderCompCharts(){
     afterDraw(chart){
       const {ctx,chartArea,scales}=chart;
       if(!scales.x)return;
-      const x0=scales.x.getPixelForValue(cargaVehs.length-1);
-      const x1=scales.x.getPixelForValue(cargaVehs.length);
-      const xMid=(x0+x1)/2;
+      const x0=scales.x.getPixelForValue(cargaVehs.length-0.5);
       ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(xMid,chartArea.top);
-      ctx.lineTo(xMid,chartArea.bottom);
-      ctx.strokeStyle='rgba(0,0,0,0.18)';
-      ctx.setLineDash([5,4]);
-      ctx.lineWidth=1.5;
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x0,chartArea.top); ctx.lineTo(x0,chartArea.bottom);
+      ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.setLineDash([5,4]); ctx.lineWidth=1.5; ctx.stroke();
       ctx.setLineDash([]);
-      ctx.font='bold 10px -apple-system,BlinkMacSystemFont,sans-serif';
-      ctx.textAlign='center';
-      ctx.fillStyle='rgba(112,32,130,0.7)';
-      ctx.fillText('◀  CARGA',(chartArea.left+xMid)/2,chartArea.top+12);
-      ctx.fillStyle='rgba(235,0,139,0.7)';
-      ctx.fillText('DESCARGA  ▶',(xMid+chartArea.right)/2,chartArea.top+12);
+      ctx.font='bold 10px -apple-system,BlinkMacSystemFont,sans-serif'; ctx.textAlign='center';
+      ctx.fillStyle='rgba(112,32,130,0.75)';
+      ctx.fillText('◀  CARGA',(chartArea.left+x0)/2,chartArea.top+14);
+      ctx.fillStyle='rgba(235,0,139,0.75)';
+      ctx.fillText('DESCARGA  ▶',(x0+chartArea.right)/2,chartArea.top+14);
       ctx.restore();
     }
   };
 
   CI['comp_gen']=new Chart(document.getElementById('c_comp_gen'),{
     type:'bar',
-    data:{
-      labels:allOrdered,
-      datasets:[
-        {label:'Tiempo promedio',data:compAvgs,backgroundColor:compColors,borderColor:compBorders,borderWidth:1.5,borderRadius:6},
-        {label:'Meta objetivo',data:compTgts,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',fill:false,tension:0}
-      ]
-    },
-    plugins:[dividerPlugin],
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} min`}}},
-      scales:{y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}
-    }
-  });
-
-  // ── Variabilidad CARGA (vc) ──
-  const vcMn=cargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
-  const vcAv=cargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
-  const vcMx=cargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
-  const vcTg=cargaVehs.map(v=>TARGETS[v]);
-  CI['var_carga']=new Chart(document.getElementById('c_var_carga'),{
-    type:'bar',
-    data:{
-      labels:cargaVehs,
-      datasets:[
-        {label:'Mínimo',data:vcMn,backgroundColor:'rgba(112,32,130,0.15)',borderColor:'rgba(112,32,130,0.35)',borderWidth:1,borderRadius:4,stack:'s'},
-        {label:'Promedio',data:vcAv,backgroundColor:'rgba(112,32,130,0.72)',borderColor:'#702082',borderWidth:1,borderRadius:4,stack:'p'},
-        {label:'Máximo',data:vcMx,backgroundColor:'rgba(112,32,130,0.32)',borderColor:'rgba(112,32,130,0.6)',borderWidth:1,borderRadius:4,stack:'x'},
-        {label:'Meta objetivo',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',fill:false,tension:0}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} min`}}},
-      scales:{y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}
-    }
-  });
-
-  // ── Variabilidad DESCARGA (vd) ──
-  const vdMn=descargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
-  const vdAv=descargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
-  const vdMx=descargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
-  const vdTg=descargaVehs.map(v=>TARGETS[v]);
-  CI['var_desc']=new Chart(document.getElementById('c_var_desc'),{
-    type:'bar',
-    data:{
-      labels:descargaVehs,
-      datasets:[
-        {label:'Mínimo',data:vdMn,backgroundColor:'rgba(235,0,139,0.12)',borderColor:'rgba(235,0,139,0.35)',borderWidth:1,borderRadius:4,stack:'s'},
-        {label:'Promedio',data:vdAv,backgroundColor:'rgba(235,0,139,0.72)',borderColor:'#EB008B',borderWidth:1,borderRadius:4,stack:'p'},
-        {label:'Máximo',data:vdMx,backgroundColor:'rgba(235,0,139,0.3)',borderColor:'rgba(235,0,139,0.6)',borderWidth:1,borderRadius:4,stack:'x'},
-        {label:'Meta objetivo',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',fill:false,tension:0}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} min`}}},
-      scales:{y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}},x:{ticks:{font:{size:10},maxRotation:15}}}
-    }
-  });
-
-  const semToX={'S-01':1,'S-03':3,'S-04':4,'S-05':5,'S-06':6,'S-08':8,'S-09':9};
-  const scatVehs=[...new Set(D.map(r=>r.veh))];
-  const scatShapes=['circle','rect','triangle','rectRot','cross','star'];
-  document.getElementById('leg_scatter').innerHTML=scatVehs.map((v,i)=>`<span><span class="ldot" style="background:${VEH_COLORS[v]||'#888'};"></span>${v}</span>`).join('');
-  CI['scat']=new Chart(document.getElementById('c_scat'),{
-    type:'scatter',
-    data:{datasets:scatVehs.map((v,i)=>({
-      label:v,
-      data:D.filter(r=>r.veh===v).map(r=>({x:(semToX[r.sem]||1)+(Math.random()-0.5)*0.2,y:r.t})),
-      backgroundColor:VEH_COLORS[v]||'#888',
-      borderColor:(VEH_COLORS[v]||'#888'),
-      pointRadius:6,pointHoverRadius:8,
-      pointStyle:scatShapes[i%scatShapes.length],
-    }))},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} min`}}},
+    data:{labels:allOrdered,datasets:[
+      {label:'Promedio',data:compAvgs,backgroundColor:compColors,borderColor:compBorders,borderWidth:1.5,borderRadius:6},
+      {label:'Meta',data:compTgts,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+    ]},
+    plugins:[dividerPlugin,valueLabelPlugin],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+        title:ctx=>ctx[0].label,
+        label:ctx=>ctx.datasetIndex===0?[` Promedio: ${ctx.raw} min`,` Meta: ${compTgts[ctx.dataIndex]} min`,` ${ctx.raw<=compTgts[ctx.dataIndex]?'✔ En meta':'⚠ +'+(ctx.raw-compTgts[ctx.dataIndex]).toFixed(1)+' min'}`]:` Meta: ${ctx.raw} min`
+      }}},
       scales:{
-        x:{type:'linear',min:0,max:10,title:{display:true,text:'Semana',font:{size:11}},ticks:{font:{size:11},callback:v=>{const m={1:'S-01',3:'S-03',4:'S-04',5:'S-05',6:'S-06',8:'S-08',9:'S-09'};return m[v]||'';},stepSize:1}},
-        y:{title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}}
+        y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},maxRotation:15},grid:{display:false}}
       }
     }
   });
 
-  const descVehs=['Furgón 22 tar.','Furgón 26 tar.'];
-  const localAvg=descVehs.map(v=>+av(D.filter(r=>r.veh===v&&r.prov==='Local').map(r=>r.t)).toFixed(1));
-  const impAvg=descVehs.map(v=>+av(D.filter(r=>r.veh===v&&r.prov==='Importado').map(r=>r.t)).toFixed(1));
-  CI['lvi']=new Chart(document.getElementById('c_lvi'),{
+  // ── Variabilidad CARGA — Min / Promedio / Máximo ──
+  const vcMn=cargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
+  const vcAv=cargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
+  const vcMx=cargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
+  const vcTg=cargaVehs.map(v=>TARGETS[v]);
+
+  const varLabelPlugin={
+    id:'varLabel',
+    afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      [0,1,2].forEach(di=>{
+        if(chart.data.datasets[di]?.type==='line')return;
+        const meta=chart.getDatasetMeta(di);
+        const labels=['min','avg','máx'];
+        const lc=['rgba(112,32,130,0.6)','#702082','rgba(112,32,130,0.55)'];
+        meta.data.forEach((bar,i)=>{
+          const v=chart.data.datasets[di].data[i];
+          if(!v)return;
+          ctx.save();
+          ctx.font=`${di===1?'bold ':' '}10px -apple-system,sans-serif`;
+          ctx.fillStyle=di===1?'white':'#333';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          if(bar.height>14) ctx.fillText(v,bar.x,bar.y+bar.height/2);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  CI['var_carga']=new Chart(document.getElementById('c_var_carga'),{
     type:'bar',
-    data:{
-      labels:['Furgón 22 tar.','Furgón 26 tar.'],
-      datasets:[
-        {label:'Local',data:localAvg,backgroundColor:'rgba(112,32,130,0.75)',borderRadius:5,barPercentage:0.6},
-        {label:'Importado',data:impAvg,backgroundColor:'rgba(235,0,139,0.75)',borderRadius:5,barPercentage:0.6},
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} min`}}},
-      scales:{y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:11}},ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}
+    data:{labels:cargaVehs,datasets:[
+      {label:'Mínimo',data:vcMn,backgroundColor:'rgba(112,32,130,0.18)',borderColor:'rgba(112,32,130,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Promedio',data:vcAv,backgroundColor:'rgba(112,32,130,0.75)',borderColor:'#702082',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Máximo',data:vcMx.map((v,i)=>+(v-vcAv[i]).toFixed(1)),backgroundColor:'rgba(112,32,130,0.22)',borderColor:'rgba(112,32,130,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Meta',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
+      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}}}
     }
   });
 
-  const cumpVehs=[...ALL_VEHS];
-  const cumpPcts=cumpVehs.map(v=>{
-    const all=getVehData(v);
-    const onT=all.filter(t=>t<=TARGETS[v]);
-    return all.length?Math.round(onT.length/all.length*100):0;
+  // ── Variabilidad DESCARGA ──
+  const vdMn=descargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
+  const vdAv=descargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
+  const vdMx=descargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
+  const vdTg=descargaVehs.map(v=>TARGETS[v]);
+
+  CI['var_desc']=new Chart(document.getElementById('c_var_desc'),{
+    type:'bar',
+    data:{labels:descargaVehs,datasets:[
+      {label:'Mínimo',data:vdMn,backgroundColor:'rgba(235,0,139,0.15)',borderColor:'rgba(235,0,139,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Promedio',data:vdAv,backgroundColor:'rgba(235,0,139,0.75)',borderColor:'#EB008B',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Máximo',data:vdMx.map((v,i)=>+(v-vdAv[i]).toFixed(1)),backgroundColor:'rgba(235,0,139,0.2)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
+      {label:'Meta',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
+      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:9},maxRotation:15},grid:{display:false}}}
+    }
   });
-  const cumpColors=cumpPcts.map(p=>p>=80?'rgba(39,174,96,0.8)':p>=50?'rgba(243,156,18,0.8)':'rgba(231,76,60,0.8)');
+
+  // ── Scatter mejorado — sin jitter, con líneas de meta ──
+  const semToX={'S-01':1,'S-03':3,'S-04':4,'S-05':5,'S-06':6,'S-08':8,'S-09':9};
+  const scatVehs=[...new Set(D.map(r=>r.veh))];
+  document.getElementById('leg_scatter').innerHTML=scatVehs.map(v=>`<span><span class="ldot" style="background:${VEH_COLORS[v]||'#888'};"></span>${v}</span>`).join('');
+
+  // Calcular promedios por semana para línea de tendencia global
+  const semXvals=Object.values(semToX);
+  const semAvgs=Object.keys(semToX).map(s=>{const t=D.filter(r=>r.sem===s).map(r=>r.t);return t.length?{x:semToX[s],y:+av(t).toFixed(1)}:null;}).filter(Boolean);
+
+  CI['scat']=new Chart(document.getElementById('c_scat'),{
+    type:'scatter',
+    data:{datasets:[
+      ...scatVehs.map(v=>({
+        label:v,
+        data:D.filter(r=>r.veh===v).map(r=>({x:semToX[r.sem]||1,y:r.t,obs:r.obs||''})),
+        backgroundColor:VEH_COLORS[v]||'#888',
+        borderColor:(VEH_COLORS[v]||'#888'),
+        pointRadius:6,pointHoverRadius:9,
+        pointStyle:'circle',
+        pointBorderColor:'white',pointBorderWidth:1.5
+      })),
+      {label:'Promedio semanal',data:semAvgs,type:'line',borderColor:'rgba(0,0,0,0.25)',borderWidth:1.5,borderDash:[4,3],pointRadius:3,pointBackgroundColor:'rgba(0,0,0,0.3)',fill:false,tension:0.2,showLine:true}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+          title:ctx=>ctx[0].dataset.label==='Promedio semanal'?`Semana promedio: ${ctx[0].parsed.y} min`:ctx[0].dataset.label,
+          label:ctx=>{
+            if(ctx.dataset.label==='Promedio semanal')return` Promedio: ${ctx.parsed.y} min`;
+            const obs=ctx.raw.obs;
+            return[` Tiempo: ${ctx.parsed.y} min`,obs?` Obs: ${obs}`:null].filter(Boolean);
+          }
+        }}
+      },
+      scales:{
+        x:{type:'linear',min:0,max:10,
+           title:{display:true,text:'Semana',font:{size:10}},
+           ticks:{font:{size:10},callback:v=>{const m={1:'S-01',3:'S-03',4:'S-04',5:'S-05',6:'S-06',8:'S-08',9:'S-09'};return m[v]||'';},stepSize:1},
+           grid:{color:'rgba(0,0,0,0.04)'}},
+        y:{title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}
+      }
+    }
+  });
+
+  // ── Local vs Importado ──
+  const descVehs=['Furgón 22 tar.','Furgón 26 tar.'];
+  const localAvg=descVehs.map(v=>+av(D.filter(r=>r.veh===v&&r.prov==='Local').map(r=>r.t)).toFixed(1));
+  const impAvg=descVehs.map(v=>+av(D.filter(r=>r.veh===v&&r.prov==='Importado').map(r=>r.t)).toFixed(1));
+  const localCnt=descVehs.map(v=>D.filter(r=>r.veh===v&&r.prov==='Local').length);
+  const impCnt=descVehs.map(v=>D.filter(r=>r.veh===v&&r.prov==='Importado').length);
+
+  CI['lvi']=new Chart(document.getElementById('c_lvi'),{
+    type:'bar',
+    data:{
+      labels:descVehs,
+      datasets:[
+        {label:'Local',data:localAvg,backgroundColor:'rgba(112,32,130,0.78)',borderRadius:5,barPercentage:0.65,borderColor:'#702082',borderWidth:1},
+        {label:'Importado',data:impAvg,backgroundColor:'rgba(235,0,139,0.78)',borderRadius:5,barPercentage:0.65,borderColor:'#EB008B',borderWidth:1},
+      ]
+    },
+    plugins:[valueLabelPlugin],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:18}},
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:8}},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+          label:ctx=>{const cnt=ctx.datasetIndex===0?localCnt[ctx.dataIndex]:impCnt[ctx.dataIndex];return` ${ctx.dataset.label}: ${ctx.raw} min (${cnt} registros)`;}
+        }}
+      },
+      scales:{y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}
+    }
+  });
+
+  // ── Cumplimiento de meta — horizontal con etiquetas ──
+  const cumpVehs=[...ALL_VEHS];
+  const cumpPcts=cumpVehs.map(v=>{const all=getVehData(v);const onT=all.filter(t=>t<=TARGETS[v]);return all.length?Math.round(onT.length/all.length*100):0;});
+  const cumpColors=cumpPcts.map(p=>p>=80?'rgba(39,174,96,0.82)':p>=50?'rgba(243,156,18,0.82)':'rgba(231,76,60,0.82)');
+  const cumpBorders=cumpPcts.map(p=>p>=80?'#27AE60':p>=50?'#F39C12':'#E74C3C');
+  const cumpCounts=cumpVehs.map(v=>{const all=getVehData(v);return`${all.filter(t=>t<=TARGETS[v]).length}/${all.length}`;});
+
+  const cumpLabelPlugin={
+    id:'cumpLabel',
+    afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      const meta=chart.getDatasetMeta(0);
+      meta.data.forEach((bar,i)=>{
+        const val=cumpPcts[i];
+        const cnt=cumpCounts[i];
+        ctx.save();
+        ctx.font='bold 11px -apple-system,BlinkMacSystemFont,sans-serif';
+        ctx.fillStyle='#1d1d1f'; ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(`${val}%  (${cnt})`, bar.x+6, bar.y);
+        ctx.restore();
+      });
+    }
+  };
 
   CI['cump']=new Chart(document.getElementById('c_cump'),{
     type:'bar',
-    data:{
-      labels:cumpVehs,
-      datasets:[
-        {label:'% en meta',data:cumpPcts,backgroundColor:cumpColors,borderRadius:5,borderWidth:0},
-        {label:'Objetivo (80%)',data:cumpVehs.map(()=>80),type:'line',borderColor:'#FFC72C',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}
-      ]
-    },
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}%`}}},
+    data:{labels:cumpVehs,datasets:[
+      {label:'% en meta',data:cumpPcts,backgroundColor:cumpColors,borderColor:cumpBorders,borderWidth:1.5,borderRadius:5,borderSkipped:false},
+      {label:'Objetivo (80%)',data:cumpVehs.map(()=>80),type:'line',borderColor:'#FFC72C',borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0}
+    ]},
+    plugins:[cumpLabelPlugin],
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:120}},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+        title:ctx=>ctx[0].label,
+        label:ctx=>ctx.datasetIndex===0?[` En meta: ${cumpCounts[ctx.dataIndex]} operaciones`,` Cumplimiento: ${ctx.raw}%`,` Objetivo: 80%`]:` Línea objetivo: 80%`
+      }}},
       scales:{
-        x:{min:0,max:100,title:{display:true,text:'% cumplimiento',font:{size:11}},ticks:{font:{size:11},callback:v=>v+'%'}},
-        y:{ticks:{font:{size:11}}}
+        x:{min:0,max:100,title:{display:true,text:'% cumplimiento',font:{size:10}},ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:10,weight:'500'}},grid:{display:false}}
       }
     }
   });
@@ -1496,257 +1539,6 @@ function checkPwd(){
 // ══════════════════════════════════════════════════════════
 //  🤖 ANÁLISIS CON INTELIGENCIA ARTIFICIAL (Claude API)
 // ══════════════════════════════════════════════════════════
-let aiApiKey = '';
-
-function showAiPanel(){
-  const p=document.getElementById('ai_panel');
-  p.style.display=p.style.display==='none'?'block':'none';
-}
-
-function saveApiKey(){
-  const k=document.getElementById('ai_key_input').value.trim();
-  if(!k.startsWith('sk-ant-')){
-    document.getElementById('ai_key_status').textContent='⚠ El formato no parece correcto — debe empezar con sk-ant-...';
-    document.getElementById('ai_key_status').style.color='#E67E22';
-    return;
-  }
-  aiApiKey=k;
-  document.getElementById('ai_key_input').value='••••••••••••••••••••';
-  document.getElementById('ai_key_status').innerHTML='✅ Clave guardada en sesión — listo para analizar';
-  document.getElementById('ai_key_status').style.color='#27AE60';
-  document.getElementById('ai_actions').style.display='flex';
-  document.getElementById('ai_key_badge').textContent='Clave activa esta sesión';
-}
-
-function buildDataSummary(){
-  const lines=[];
-  lines.push(`=== DATOS DEL CD TACO BELL GUATEMALA (${D.length} registros, Marzo–Abril 2026) ===\n`);
-
-  lines.push('--- OPERACIONES DE CARGA ---');
-  ['Camión 10-12t','Camión 5.4t'].forEach(v=>{
-    const data=getVehData(v);
-    if(!data.length)return;
-    const avg=+av(data).toFixed(1), minT=+mn(data).toFixed(1), maxT=+mx(data).toFixed(1);
-    const tgt=TARGETS[v], dev=+((avg-tgt)/tgt*100).toFixed(0);
-    const excCnt=data.filter(t=>t>tgt).length;
-    lines.push(`• ${v}: promedio=${avg}min | min=${minT} | max=${maxT} | meta=${tgt}min | desviación=${dev>0?'+':''}${dev}% | ${excCnt}/${data.length} registros fuera de meta`);
-  });
-
-  lines.push('\n--- OPERACIONES DE DESCARGA ---');
-  ['Furgón 22 tar.','Furgón 26 tar.','Camión granel','Camión pallets'].forEach(v=>{
-    const data=getVehData(v);
-    if(!data.length)return;
-    const avg=+av(data).toFixed(1), minT=+mn(data).toFixed(1), maxT=+mx(data).toFixed(1);
-    const tgt=TARGETS[v], dev=+((avg-tgt)/tgt*100).toFixed(0);
-    const loc=D.filter(r=>r.veh===v&&r.prov==='Local').map(r=>r.t);
-    const imp=D.filter(r=>r.veh===v&&r.prov==='Importado').map(r=>r.t);
-    let provStr='';
-    if(loc.length) provStr+=` | Local=${+av(loc).toFixed(1)}min(${loc.length}reg)`;
-    if(imp.length) provStr+=` | Importado=${+av(imp).toFixed(1)}min(${imp.length}reg)`;
-    lines.push(`• ${v}: promedio=${avg}min | min=${minT} | max=${maxT} | meta=${tgt}min | desviación=${dev>0?'+':''}${dev}%${provStr}`);
-  });
-
-  lines.push('\n--- INCIDENCIAS DOCUMENTADAS EN OBSERVACIONES ---');
-  const incRecs=D.filter(r=>r.obs&&r.obs.trim()!=='');
-  if(incRecs.length){
-    incRecs.slice(0,8).forEach(r=>lines.push(`• [${r.sem} ${r.mes}] ${r.veh} (${r.t}min): ${r.obs}`));
-    if(incRecs.length>8) lines.push(`  ...y ${incRecs.length-8} observaciones más`);
-  } else {
-    lines.push('Sin incidencias documentadas');
-  }
-
-  lines.push('\n--- DOTACIÓN DE PERSONAL ---');
-  const conP=D.filter(r=>r.p!=null&&r.p>0);
-  if(conP.length){
-    const g1=conP.filter(r=>r.p===1), g2=conP.filter(r=>r.p===2), g3=conP.filter(r=>r.p>=3);
-    if(g1.length) lines.push(`• 1 persona: ${g1.length} ops, promedio ${+av(g1.map(r=>r.t)).toFixed(1)}min`);
-    if(g2.length) lines.push(`• 2 personas: ${g2.length} ops, promedio ${+av(g2.map(r=>r.t)).toFixed(1)}min`);
-    if(g3.length) lines.push(`• 3+ personas: ${g3.length} ops, promedio ${+av(g3.map(r=>r.t)).toFixed(1)}min`);
-  }
-
-  lines.push('\n--- TRASIEGO DE PRODUCTO ---');
-  if(DT.length){
-    const c=DT.filter(r=>r.congelado!=null).map(r=>r.congelado);
-    const ref=DT.filter(r=>r.refrigerado!=null).map(r=>r.refrigerado);
-    if(c.length) lines.push(`• Congelado: ${+av(c).toFixed(1)}min promedio (${c.length} registros)`);
-    if(ref.length) lines.push(`• Refrigerado: ${+av(ref).toFixed(1)}min promedio (${ref.length} registros)`);
-    const prodVal=DT.filter(r=>r.cajas&&r.congelado).map(r=>+(r.cajas/r.congelado).toFixed(2));
-    if(prodVal.length) lines.push(`• Productividad: ${+av(prodVal).toFixed(2)} cajas/min`);
-  } else {
-    lines.push('Sin registros de trasiego');
-  }
-
-  const sems=[...new Set(D.map(r=>r.sem))].sort();
-  lines.push(`\n--- SEMANAS CON DATOS: ${sems.join(', ')} ---`);
-  lines.push(`Total registros carga: ${D.filter(r=>r.tipo==='Carga').length} | descarga: ${D.filter(r=>r.tipo==='Descarga').length}`);
-
-  return lines.join('\n');
-}
-
-function buildPrompt(tipo){
-  const data=buildDataSummary();
-  const base=`Eres un experto en Supply Chain y Lean Manufacturing. Analiza estos datos operacionales del Centro de Distribución (CD) de Taco Bell Guatemala (operado por Belluno S.A.), programa de mejora continua Supply Chain Trainee 2026.\n\nResponde SIEMPRE en español, de forma clara, directa y orientada a la acción.\n\n${data}\n\n`;
-
-  const prompts={
-    resumen: base+`Genera un RESUMEN EJECUTIVO para presentar al Gerente de Supply Chain. Incluye:
-
-📌 ESTADO GENERAL DEL CD (2-3 oraciones, tono ejecutivo)
-✅ LO QUE ESTÁ FUNCIONANDO BIEN (máximo 3 puntos con datos)
-⚠ PROBLEMAS CRÍTICOS (máximo 3 puntos con datos específicos)
-📈 RECOMENDACIÓN PRINCIPAL PARA ESTA SEMANA (una acción concreta)
-🎯 KPI CLAVE A MONITOREAR (el indicador más importante ahora mismo)
-
-Sé conciso. El gerente necesita entender la situación en menos de 2 minutos.`,
-
-    prioridades: base+`Identifica las TOP 3 PRIORIDADES OPERACIONALES para esta semana en el CD. Para cada una:
-
-PRIORIDAD #N: [nombre]
-• Evidencia: [dato específico que justifica la prioridad]
-• Responsable sugerido: [quién debe ejecutarla]
-• Acción concreta: [qué hacer exactamente, paso a paso]
-• Resultado esperado: [qué mejora se debe ver esta semana]
-• Indicador de éxito: [cómo saber que funcionó]
-
-Ordénalas de mayor a menor impacto en los tiempos de operación.`,
-
-    proveedores: base+`Realiza un ANÁLISIS DE PROVEEDORES basado en los datos disponibles. Incluye:
-
-📦 COMPARATIVA LOCAL vs IMPORTADO
-• Diferencias en tiempo de descarga por tipo de furgón
-• ¿Qué proveedor genera más variabilidad?
-
-🏭 ANÁLISIS POR PROVEEDOR (Panifresh, Ingrup, Seaboard Marine, otros mencionados)
-• Tiempo promedio de descarga por proveedor (si hay datos)
-• Incidencias asociadas
-
-📋 RECOMENDACIONES
-• ¿Qué cláusulas incluir en las órdenes de compra?
-• ¿Qué protocolo de pre-recepción implementar?
-• ¿A qué proveedor comunicar ajustes inmediatamente?`,
-
-    sop: base+`Genera RECOMENDACIONES DE SOP (Procedimientos Estándar de Operación) para el CD. Para cada proceso:
-
-🚛 SOP DE CARGA (Camión 10-12t y 5.4t)
-• Pasos estándar basados en los mejores tiempos registrados
-• Dotación mínima recomendada
-• Puntos de control y alertas
-• Meta de tiempo y semáforo de seguimiento
-
-📦 SOP DE DESCARGA (Furgón 22 tar., Furgón 26 tar., Granel, Pallets)
-• Checklist pre-descarga
-• Dotación mínima por tipo de vehículo
-• Protocolo cuando se detectan tarimas cruzadas
-• Meta de tiempo y criterio de escalamiento
-
-📊 INDICADORES A REGISTRAR en cada operación (qué datos son críticos para el análisis futuro)`
-  };
-  return prompts[tipo]||prompts.resumen;
-}
-
-const AI_TITLES={
-  resumen:'Resumen ejecutivo para gerencia',
-  prioridades:'Top prioridades esta semana',
-  proveedores:'Análisis por proveedor',
-  sop:'Recomendaciones de SOP'
-};
-
-async function analyzeWithAI(tipo){
-  if(!aiApiKey){
-    document.getElementById('ai_setup').scrollIntoView({behavior:'smooth'});
-    document.getElementById('ai_key_input').focus();
-    return;
-  }
-
-  const resultEl=document.getElementById('ai_result');
-  const loadingEl=document.getElementById('ai_loading');
-  const bodyEl=document.getElementById('ai_result_body');
-  const titleEl=document.getElementById('ai_result_title');
-  const metaEl=document.getElementById('ai_result_meta');
-  const loadingText=document.getElementById('ai_loading_text');
-
-  resultEl.style.display='block';
-  loadingEl.style.display='block';
-  bodyEl.style.display='none';
-  titleEl.textContent=AI_TITLES[tipo]||'Análisis IA';
-  metaEl.textContent='Generando análisis...';
-  resultEl.scrollIntoView({behavior:'smooth',block:'start'});
-
-  const loadingMsgs=[
-    'Analizando tiempos de operación...','Identificando patrones en los datos...','Calculando desviaciones vs metas...','Preparando recomendaciones lean...','Redactando análisis ejecutivo...'
-  ];
-  let msgIdx=0;
-  const msgInterval=setInterval(()=>{
-    loadingText.textContent=loadingMsgs[msgIdx%loadingMsgs.length];
-    msgIdx++;
-  },1800);
-
-  try{
-    const response=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':aiApiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        system:'Eres un consultor experto en Supply Chain y Lean Manufacturing para centros de distribución de alimentos en Latinoamérica. Siempre respondes en español, con datos precisos y recomendaciones accionables. Eres directo, profesional y orientado a resultados operacionales.',
-        messages:[{role:'user',content:buildPrompt(tipo)}]
-      })
-    });
-
-    clearInterval(msgInterval);
-
-    if(!response.ok){
-      const err=await response.json().catch(()=>({}));
-      throw new Error(err.error?.message||`HTTP ${response.status}`);
-    }
-
-    const data=await response.json();
-    const text=data.content?.find(b=>b.type==='text')?.text||'Sin respuesta';
-
-    loadingEl.style.display='none';
-    bodyEl.style.display='block';
-
-    // Renderizar con formato visual
-    bodyEl.innerHTML=formatAIResponse(text);
-    metaEl.textContent=`Generado ${new Date().toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'})} · ${D.length} registros analizados · claude-sonnet-4`;
-
-  } catch(e){
-    clearInterval(msgInterval);
-    loadingEl.style.display='none';
-    bodyEl.style.display='block';
-    if(e.message.includes('401')||e.message.includes('authentication')){
-      bodyEl.innerHTML=`<div style="color:#E74C3C;padding:12px;background:rgba(231,76,60,0.05);border-radius:8px;border:1px solid rgba(231,76,60,0.2);">
-        ❌ <strong>Clave de API inválida.</strong> Verifica que copiaste correctamente la clave desde console.anthropic.com
-      </div>`;
-    } else if(e.message.includes('Failed to fetch')||e.message.includes('network')){
-      bodyEl.innerHTML=`<div style="color:#E67E22;padding:12px;background:rgba(230,126,34,0.05);border-radius:8px;border:1px solid rgba(230,126,34,0.2);">
-        ⚠ <strong>Error de conexión.</strong> Verifica tu conexión a internet e intenta de nuevo.
-      </div>`;
-    } else {
-      bodyEl.innerHTML=`<div style="color:#E74C3C;padding:12px;background:rgba(231,76,60,0.05);border-radius:8px;">
-        ❌ Error: ${e.message}
-      </div>`;
-    }
-    metaEl.textContent='Error al generar análisis';
-  }
-}
-
-function formatAIResponse(text){
-  // Convertir el texto de IA en HTML con formato visual
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\n(#{1,3} .+)/g,'\n<h4 style="color:#702082;font-size:13px;font-weight:600;margin:14px 0 6px;border-bottom:1px solid rgba(112,32,130,0.12);padding-bottom:4px;">$1</h4>')
-    .replace(/(📌|✅|⚠|📈|🎯|📦|🏭|📋|🚛|📊|PRIORIDAD #\d+:?)[^\n]*/g,'<p style="font-weight:500;color:#1d1d1f;margin:10px 0 4px;">$&</p>')
-    .replace(/•([^\n]+)/g,'<div style="display:flex;gap:6px;margin:4px 0 4px 8px;font-size:12px;"><span style="color:#702082;flex-shrink:0;margin-top:1px;">›</span><span>$1</span></div>')
-    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n{2,}/g,'<br>')
-    .replace(/\n/g,'<br>');
-}
-// ══════════════════════════════════════════════════════════
 const SEED_D = D.map(r=>({...r}));    // copia de datos iniciales para sembrar
 const SEED_DT = DT.map(r=>({...r}));
 
@@ -1828,3 +1620,4 @@ initFirebase();
 </script>
 </body>
 </html>
+
