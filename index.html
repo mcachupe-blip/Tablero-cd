@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tablero de Control de Tiempos — CD Taco Bell Guatemala 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -19,7 +21,7 @@
       --color-border-tertiary:      #e5e5ea;
       --border-radius-lg:           12px;
       --border-radius-md:           8px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
     /* ── Reset y base ── */
@@ -110,40 +112,10 @@
 
     /* ── Responsive básico ── */
     @media (max-width: 600px) {
-      body { padding: 6px; }
-      .wrapper { border-radius: 8px; }
-      .k6 { grid-template-columns: repeat(2,minmax(0,1fr)); gap:8px; }
+      body { padding: 8px; }
+      .k6 { grid-template-columns: repeat(2,minmax(0,1fr)); }
       .g2 { grid-template-columns: 1fr; }
       .fg3 { grid-template-columns: 1fr 1fr; }
-      .nav { gap: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding: 0 12px; }
-      .nav button { font-size: 12px; padding: 10px 10px; white-space: nowrap; flex-shrink: 0; }
-      .hdr { padding: 12px; }
-      .hdr p:first-child { font-size: 13px; }
-      .hdr p:last-child { font-size: 10px; }
-      .cd { padding: 10px; }
-      .ct { font-size: 13px; }
-      .cs { font-size: 10px; }
-      .kv { font-size: 22px; }
-      .mc { flex-direction: column; gap: 8px; }
-      .mi { width: 28px; height: 28px; font-size: 13px; flex-shrink: 0; }
-      /* Meta grid — 2 columnas en móvil */
-      #meta_grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
-      /* Formularios */
-      .af select, .af input { font-size: 14px; padding: 8px 10px; }
-      /* Tablas scroll */
-      .tw { font-size: 11px; }
-      td, th { padding: 6px 8px; }
-      /* Scatter y gráficas altas */
-      #c_scat { height: 220px !important; }
-      /* Badges inline → stack */
-      .badge { font-size: 9px; padding: 1px 5px; }
-      /* Buttons en mejoras */
-      .mc > div > div:first-child { flex-wrap: wrap; }
-    }
-    @media (max-width: 400px) {
-      .k6 { grid-template-columns: 1fr 1fr; }
-      #meta_grid { grid-template-columns: 1fr !important; }
-      .nav button { font-size: 11px; padding: 10px 8px; }
     }
   </style>
 </head>
@@ -193,31 +165,65 @@
   </div>
 
   <div class="cd">
-    <p class="ct">Ranking de operaciones por tiempo promedio</p>
-    <p class="cs">Barras ordenadas de menor a mayor · <span style="color:#27AE60;font-weight:500;">■ verde</span> = dentro de meta · <span style="color:#E67E22;font-weight:500;">■ naranja</span> = hasta 30% sobre meta · <span style="color:#E74C3C;font-weight:500;">■ rojo</span> = excede meta · <span style="color:#FFC72C;font-weight:600;">- - -</span> línea amarilla = meta objetivo</p>
-    <div style="position:relative;height:260px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+      <div>
+        <p class="ct" style="margin-bottom:3px;">Ranking de operaciones por tiempo promedio</p>
+        <p class="cs" style="margin-bottom:6px;">Vehículos ordenados de menor a mayor dentro de su grupo · <strong style="color:#702082;">CARGA</strong> (distribución a restaurantes) y <strong style="color:#EB008B;">DESCARGA</strong> (recepción de proveedores)</p>
+        <div class="leg">
+          <span><span class="lsq" style="background:#27AE60;border-radius:3px;"></span>Dentro de meta</span>
+          <span><span class="lsq" style="background:#F39C12;border-radius:3px;"></span>Hasta 30% sobre meta</span>
+          <span><span class="lsq" style="background:#E74C3C;border-radius:3px;"></span>Excede meta</span>
+          <span><span style="display:inline-block;width:18px;height:2px;border-bottom:2px dashed #FFC72C;vertical-align:middle;margin-right:3px;"></span>Meta objetivo</span>
+        </div>
+      </div>
+    </div>
+    <div style="position:relative;height:280px;">
       <canvas id="c_rank" role="img" aria-label="Ranking horizontal de todas las operaciones por tiempo promedio">Ranking de tiempos promedio por operación.</canvas>
     </div>
   </div>
 
   <div class="g2">
     <div class="cd" style="margin-bottom:0;">
-      <p class="ct">Tendencia semanal de carga</p>
-      <p class="cs">Promedio por semana · ambos tipos de vehículo</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+        <div style="width:10px;height:10px;border-radius:2px;background:#702082;"></div>
+        <p class="ct" style="margin-bottom:0;">Tendencia semanal — CARGA</p>
+      </div>
+      <p class="cs">Promedio por semana · vehículos de distribución a restaurantes</p>
       <div class="leg">
         <span><span class="lsq" style="background:#702082;"></span>Camión 10-12t</span>
-        <span><span class="lsq" style="background:#EB008B;border:2px dashed #EB008B;background:transparent;"></span>Camión 5.4t</span>
+        <span><span style="display:inline-block;width:18px;height:2px;border-bottom:2px dashed #EB008B;vertical-align:middle;margin-right:3px;"></span>Camión 5.4t</span>
       </div>
       <div style="position:relative;height:200px;">
         <canvas id="c_trend" role="img" aria-label="Tendencia semanal de tiempos de carga por tipo de vehículo">Tendencia semanal de carga.</canvas>
       </div>
     </div>
     <div class="cd" style="margin-bottom:0;">
-      <p class="ct">Distribución de operaciones registradas</p>
-      <p class="cs">Mix de carga vs descarga en el período</p>
-      <div id="leg_donut" class="leg" style="margin-bottom:8px;"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+        <div style="width:10px;height:10px;border-radius:2px;background:#EB008B;"></div>
+        <p class="ct" style="margin-bottom:0;">Tendencia semanal — DESCARGA</p>
+      </div>
+      <p class="cs">Promedio por semana · vehículos de recepción de proveedores</p>
+      <div class="leg" id="leg_trend_desc">
+        <span><span class="lsq" style="background:#EB008B;"></span>Furgón 22 tar.</span>
+        <span><span style="display:inline-block;width:18px;height:2px;border-bottom:2px dashed #9B59B6;vertical-align:middle;margin-right:3px;"></span>Furgón 26 tar.</span>
+        <span><span style="display:inline-block;width:18px;height:2px;border-bottom:2px dotted #378ADD;vertical-align:middle;margin-right:3px;"></span>Granel / Pallets</span>
+      </div>
       <div style="position:relative;height:200px;">
+        <canvas id="c_trend_desc" role="img" aria-label="Tendencia semanal de tiempos de descarga por tipo de vehículo">Tendencia semanal de descarga.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd" style="margin-top:12px;">
+    <p class="ct">Distribución de operaciones registradas</p>
+    <p class="cs">Mix de carga vs descarga en el período</p>
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+      <div style="flex:0 0 200px;position:relative;height:180px;">
         <canvas id="c_donut" role="img" aria-label="Gráfica de dona mostrando distribución de operaciones de carga y descarga">Distribución carga vs descarga.</canvas>
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <div id="leg_donut" class="leg" style="flex-direction:column;gap:8px;margin-bottom:0;"></div>
+        <div id="donut_stats" style="margin-top:14px;font-size:12px;color:var(--color-text-secondary);line-height:1.7;"></div>
       </div>
     </div>
   </div>
@@ -253,14 +259,14 @@
   <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;padding-left:2px;">Vehículos de carga: <strong>Camión 10-12t</strong> y <strong>Camión 5.4t</strong> — distribución a restaurantes desde el CD</p>
 
   <div class="cd">
-    <p class="ct">Variabilidad de CARGA — rango min / promedio / máx</p>
-    <p class="cs">Cuanto más corta la barra de rango, más controlada y predecible es la operación de carga</p>
-    <div class="leg">
-      <span><span class="lsq" style="background:rgba(112,32,130,0.2);"></span>Rango min–máx</span>
-      <span><span class="lsq" style="background:#702082;"></span>Promedio</span>
-      <span><span class="lsq" style="background:#FFC72C;"></span>Meta objetivo</span>
+    <p class="ct">Variabilidad de CARGA — rango de operaciones</p>
+    <p class="cs">Cada barra muestra el rango completo de tiempos registrados (mín → máx). El círculo central es el promedio. Mientras más corta la barra, más predecible y controlada es la operación.</p>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;padding:8px 12px;background:rgba(112,32,130,0.04);border-radius:8px;">
+      <span><span style="display:inline-block;width:14px;height:14px;background:rgba(112,32,130,0.18);border:1.5px solid rgba(112,32,130,0.45);border-radius:3px;vertical-align:middle;margin-right:5px;"></span>Rango min–máx</span>
+      <span><span style="display:inline-block;width:14px;height:14px;background:#702082;border-radius:50%;border:2px solid white;box-shadow:0 0 0 1.5px #702082;vertical-align:middle;margin-right:5px;"></span>Promedio (valor exacto dentro del círculo)</span>
+      <span><span style="display:inline-block;width:20px;height:2px;border-bottom:2px dashed #FFC72C;vertical-align:middle;margin-right:5px;"></span>Meta objetivo</span>
     </div>
-    <div style="position:relative;height:210px;">
+    <div style="position:relative;height:240px;">
       <canvas id="c_var_carga" role="img" aria-label="Variabilidad de operaciones de carga por tipo de camión">Variabilidad operaciones de carga.</canvas>
     </div>
   </div>
@@ -278,14 +284,14 @@
 
   <div class="g2">
     <div class="cd" style="margin-bottom:0;">
-      <p class="ct">Variabilidad de DESCARGA — rango min / promedio / máx</p>
-      <p class="cs">Furgones, granel y pallets · cuanto más corta la barra, más estable la recepción</p>
-      <div class="leg">
-        <span><span class="lsq" style="background:rgba(235,0,139,0.2);"></span>Rango min–máx</span>
-        <span><span class="lsq" style="background:#EB008B;"></span>Promedio</span>
-        <span><span class="lsq" style="background:#FFC72C;"></span>Meta</span>
+      <p class="ct">Variabilidad de DESCARGA — rango de operaciones</p>
+      <p class="cs">Rango completo registrado (mín → máx) por vehículo. El círculo es el promedio. Barra corta = operación estable y predecible; barra larga = alto grado de variación.</p>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;padding:8px 12px;background:rgba(235,0,139,0.04);border-radius:8px;">
+        <span><span style="display:inline-block;width:14px;height:14px;background:rgba(235,0,139,0.15);border:1.5px solid rgba(235,0,139,0.45);border-radius:3px;vertical-align:middle;margin-right:5px;"></span>Rango min–máx</span>
+        <span><span style="display:inline-block;width:14px;height:14px;background:#EB008B;border-radius:50%;border:2px solid white;box-shadow:0 0 0 1.5px #EB008B;vertical-align:middle;margin-right:5px;"></span>Promedio</span>
+        <span><span style="display:inline-block;width:20px;height:2px;border-bottom:2px dashed #FFC72C;vertical-align:middle;margin-right:5px;"></span>Meta objetivo</span>
       </div>
-      <div style="position:relative;height:230px;">
+      <div style="position:relative;height:260px;">
         <canvas id="c_var_desc" role="img" aria-label="Variabilidad de operaciones de descarga por tipo de vehículo">Variabilidad operaciones de descarga.</canvas>
       </div>
     </div>
@@ -710,15 +716,52 @@ function rk(){
 }
 
 function renderDashCharts(){
-  xc('rank');xc('trend');xc('donut');
+  xc('rank');xc('trend');xc('trend_desc');xc('donut');
 
-  const pairs=[...ALL_VEHS].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
+  // ── Ranking: CARGA primero (orden asc), luego DESCARGA (orden asc) ──
+  const cargaPairs=[...vc].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length,tipo:'Carga'})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
+  const descPairs=[...vd].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length,tipo:'Descarga'})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
+  const pairs=[...cargaPairs,...descPairs];
+  const nC=cargaPairs.length, nD=descPairs.length;
+
   const barColors=pairs.map(p=>p.a<=p.tgt?'rgba(39,174,96,0.85)':p.a<=p.tgt*1.3?'rgba(243,156,18,0.85)':'rgba(231,76,60,0.85)');
   const borderColors=pairs.map(p=>p.a<=p.tgt?'#27AE60':p.a<=p.tgt*1.3?'#F39C12':'#E74C3C');
 
-  // Plugin: value labels + gap label + status icon
+  // Plugin: background zones + section labels + value labels
   const rankLabelPlugin={
     id:'rankLabel',
+    beforeDraw(chart){
+      const {ctx,chartArea,scales:{y}}=chart;
+      if(!y||!chartArea)return;
+      if(nC>0){
+        const yT=y.getPixelForValue(-0.5),yB=y.getPixelForValue(nC-0.5);
+        ctx.save();ctx.fillStyle='rgba(112,32,130,0.045)';
+        ctx.fillRect(chartArea.left,yT,chartArea.right-chartArea.left,yB-yT);ctx.restore();
+      }
+      if(nD>0){
+        const yT=y.getPixelForValue(nC-0.5),yB=y.getPixelForValue(nC+nD-0.5);
+        ctx.save();ctx.fillStyle='rgba(235,0,139,0.03)';
+        ctx.fillRect(chartArea.left,yT,chartArea.right-chartArea.left,yB-yT);ctx.restore();
+      }
+      if(nC>0&&nD>0){
+        const ySep=y.getPixelForValue(nC-0.5);
+        ctx.save();ctx.beginPath();ctx.moveTo(chartArea.left,ySep);ctx.lineTo(chartArea.right-180,ySep);
+        ctx.strokeStyle='rgba(0,0,0,0.13)';ctx.setLineDash([4,3]);ctx.lineWidth=1;ctx.stroke();
+        ctx.setLineDash([]);ctx.restore();
+      }
+      ctx.save();ctx.font="bold 9.5px 'DM Sans',sans-serif";
+      if(nC>0){
+        const yM=(y.getPixelForValue(-0.5)+y.getPixelForValue(nC-0.5))/2;
+        ctx.fillStyle='rgba(112,32,130,0.5)';ctx.textAlign='left';ctx.textBaseline='middle';
+        ctx.fillText('▲ CARGA',chartArea.left+6,yM);
+      }
+      if(nD>0){
+        const yM=(y.getPixelForValue(nC-0.5)+y.getPixelForValue(nC+nD-0.5))/2;
+        ctx.fillStyle='rgba(235,0,139,0.5)';ctx.textAlign='left';ctx.textBaseline='middle';
+        ctx.fillText('▼ DESCARGA',chartArea.left+6,yM);
+      }
+      ctx.restore();
+    },
     afterDatasetsDraw(chart){
       const {ctx,scales:{x,y}}=chart;
       const ds0=chart.getDatasetMeta(0);
@@ -729,14 +772,14 @@ function renderDashCharts(){
         const gapAbs=(p.a-p.tgt).toFixed(1);
         const gapStr=p.a<=p.tgt?`−${Math.abs(gapAbs)} min`:`+${gapAbs} min`;
         ctx.save();
-        ctx.font='bold 12px -apple-system,BlinkMacSystemFont,sans-serif';
+        ctx.font=`bold 12px 'DM Sans',sans-serif`;
         ctx.fillStyle='#1d1d1f'; ctx.textAlign='left'; ctx.textBaseline='middle';
         ctx.fillText(`${p.a} min`, bar.x+7, bar.y);
-        ctx.font='10px -apple-system,BlinkMacSystemFont,sans-serif';
+        ctx.font=`10px 'DM Sans',sans-serif`;
         ctx.fillStyle=iconColor;
         const vw=ctx.measureText(`${p.a} min`).width;
         ctx.fillText(`(${gapStr} vs meta)`, bar.x+7+vw+4, bar.y);
-        ctx.font='bold 12px -apple-system,sans-serif';
+        ctx.font=`bold 12px 'DM Sans',sans-serif`;
         ctx.fillStyle=iconColor; ctx.textAlign='right';
         ctx.fillText(icon, bar.x-5, bar.y);
         ctx.restore();
@@ -764,17 +807,17 @@ function renderDashCharts(){
   CI['rank']=new Chart(document.getElementById('c_rank'),{
     type:'bar',
     data:{labels:pairs.map(p=>p.v),datasets:[
-      {label:'Tiempo promedio',data:pairs.map(p=>p.a),backgroundColor:barColors,borderColor:borderColors,borderWidth:1.5,borderRadius:6,borderSkipped:false},
-      {label:'Meta',data:pairs.map(p=>p.tgt),type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[8,4],pointRadius:6,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+      {label:'Tiempo promedio',data:pairs.map(p=>p.a),backgroundColor:barColors,borderColor:borderColors,borderWidth:0,borderRadius:7,borderSkipped:false},
+      {label:'Meta',data:pairs.map(p=>p.tgt),type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[8,4],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
     plugins:[rankLabelPlugin],
     options:{
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      layout:{padding:{right:180,top:4,bottom:4}},
+      layout:{padding:{right:190,top:4,bottom:4,left:55}},
       plugins:{
         legend:{display:false},
-        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
-          title:ctx=>ctx[0].label,
+        tooltip:{backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,titleFont:{family:"'DM Sans',sans-serif",size:12,weight:'600'},bodyFont:{family:"'DM Sans',sans-serif",size:11},callbacks:{
+          title:ctx=>`${pairs[ctx[0].dataIndex]?.tipo==='Carga'?'⬆ CARGA':'⬇ DESCARGA'} · ${ctx[0].label}`,
           label:ctx=>{
             if(ctx.datasetIndex===0){const p=pairs[ctx.dataIndex];return[` Promedio actual: ${ctx.raw} min`,` Meta objetivo:   ${p.tgt} min`,` Registros:       ${p.cnt}`,` ${ctx.raw<=p.tgt?'✔ Dentro de meta':'⚠ '+((ctx.raw-p.tgt)/p.tgt*100).toFixed(0)+'% sobre meta'}`];}
             return ` Meta: ${ctx.raw} min`;
@@ -783,9 +826,9 @@ function renderDashCharts(){
       },
       scales:{
         x:{beginAtZero:true,max:Math.ceil(Math.max(...pairs.map(p=>p.a))*1.18/5)*5,
-           title:{display:true,text:'Minutos',font:{size:11},color:'#6e6e73'},
-           grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}}},
-        y:{ticks:{font:{size:11,weight:'500'}},grid:{display:false}}
+           title:{display:true,text:'Minutos',font:{size:11,family:"'DM Sans',sans-serif"},color:'#6e6e73'},
+           grid:{color:'rgba(0,0,0,0.04)',drawBorder:false},ticks:{font:{size:11,family:"'DM Sans',sans-serif"},color:'#6e6e73'}},
+        y:{ticks:{font:{size:11,family:"'DM Sans',sans-serif",weight:'500'}},grid:{display:false}}
       }
     }
   });
@@ -804,26 +847,55 @@ function renderDashCharts(){
   notas.push(`📈 <strong>Promedio general:</strong> ${promGeneral} min · <strong>${D.length}</strong> registros totales.`);
   notaEl.innerHTML=notas.map(n=>`<div style="padding:4px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);line-height:1.5;">${n}</div>`).join('');
 
-  // ── Tendencia semanal — CARGA y DESCARGA ──
+  // ── Tendencia semanal — CARGA (solo Camión 10-12t y 5.4t) ──
   const sems=[...new Set(D.map(r=>r.sem))].sort();
   const t10=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
   const t54=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
 
+  const trendTooltipStyle={backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,titleFont:{family:"'DM Sans',sans-serif",size:12,weight:'600'},bodyFont:{family:"'DM Sans',sans-serif",size:11}};
+
   CI['trend']=new Chart(document.getElementById('c_trend'),{
     type:'line',
     data:{labels:sems,datasets:[
-      {label:'Camión 10-12t',data:t10,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.07)',tension:0.3,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:1.5,fill:true,spanGaps:false},
-      {label:'Camión 5.4t',data:t54,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[6,3],fill:true,spanGaps:false},
+      {label:'Camión 10-12t',data:t10,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.09)',tension:0.35,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:2,fill:true,spanGaps:false},
+      {label:'Camión 5.4t',data:t54,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.05)',tension:0.35,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:2,borderDash:[6,3],fill:true,spanGaps:false},
     ]},
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
-        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+        legend:{display:true,position:'bottom',labels:{font:{size:10,family:"'DM Sans',sans-serif"},boxWidth:12,padding:10,usePointStyle:true}},
+        tooltip:{...trendTooltipStyle,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
       },
       scales:{
-        y:{title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+        y:{title:{display:true,text:'Minutos',font:{size:10,family:"'DM Sans',sans-serif"}},ticks:{font:{size:10,family:"'DM Sans',sans-serif"}},grid:{color:'rgba(0,0,0,0.04)',drawBorder:false}},
+        x:{ticks:{font:{size:10,family:"'DM Sans',sans-serif"},autoSkip:false,maxRotation:30},grid:{display:false}}
+      }
+    }
+  });
+
+  // ── Tendencia semanal — DESCARGA (Furgón 22, Furgón 26, Granel, Pallets) ──
+  const tF22=sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 22 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tF26=sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tGranel=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión granel'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tPallets=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión pallets'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+
+  CI['trend_desc']=new Chart(document.getElementById('c_trend_desc'),{
+    type:'line',
+    data:{labels:sems,datasets:[
+      {label:'Furgón 22 tar.',data:tF22,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.08)',tension:0.35,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:2,fill:true,spanGaps:false},
+      {label:'Furgón 26 tar.',data:tF26,borderColor:'#9B59B6',backgroundColor:'rgba(155,89,182,0.06)',tension:0.35,pointRadius:5,pointBackgroundColor:'#9B59B6',pointBorderColor:'white',pointBorderWidth:2,borderDash:[6,3],fill:false,spanGaps:false},
+      {label:'Camión granel',data:tGranel,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.05)',tension:0.35,pointRadius:5,pointBackgroundColor:'#378ADD',pointBorderColor:'white',pointBorderWidth:2,borderDash:[3,3],fill:false,spanGaps:false},
+      {label:'Camión pallets',data:tPallets,borderColor:'#27AE60',backgroundColor:'rgba(39,174,96,0.05)',tension:0.35,pointRadius:5,pointBackgroundColor:'#27AE60',pointBorderColor:'white',pointBorderWidth:2,borderDash:[2,4],fill:false,spanGaps:false},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10,family:"'DM Sans',sans-serif"},boxWidth:12,padding:10,usePointStyle:true}},
+        tooltip:{...trendTooltipStyle,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'Minutos',font:{size:10,family:"'DM Sans',sans-serif"}},ticks:{font:{size:10,family:"'DM Sans',sans-serif"}},grid:{color:'rgba(0,0,0,0.04)',drawBorder:false}},
+        x:{ticks:{font:{size:10,family:"'DM Sans',sans-serif"},autoSkip:false,maxRotation:30},grid:{display:false}}
       }
     }
   });
@@ -831,15 +903,20 @@ function renderDashCharts(){
   // ── Donut con centro ──
   const nCarga=D.filter(r=>r.tipo==='Carga').length;
   const nDesc=D.filter(r=>r.tipo==='Descarga').length;
+  const total=nCarga+nDesc;
   document.getElementById('leg_donut').innerHTML=`
-    <span><span class="lsq" style="background:#702082;"></span>Carga (${nCarga})</span>
-    <span><span class="lsq" style="background:#EB008B;"></span>Descarga (${nDesc})</span>`;
+    <span><span class="lsq" style="background:#702082;border-radius:3px;"></span><strong style="color:#702082;">${nCarga}</strong> operaciones de Carga (${Math.round(nCarga/total*100)}%)</span>
+    <span><span class="lsq" style="background:#EB008B;border-radius:3px;"></span><strong style="color:#EB008B;">${nDesc}</strong> operaciones de Descarga (${Math.round(nDesc/total*100)}%)</span>`;
+  const avgCargaD=+av(D.filter(r=>r.tipo==='Carga').map(r=>r.t)).toFixed(1);
+  const avgDescD=+av(D.filter(r=>r.tipo==='Descarga').map(r=>r.t)).toFixed(1);
+  const statsEl=document.getElementById('donut_stats');
+  if(statsEl) statsEl.innerHTML=`<span style="color:var(--color-text-tertiary);font-size:11px;">Promedio carga:</span> <strong style="color:#702082;">${avgCargaD} min</strong><br><span style="color:var(--color-text-tertiary);font-size:11px;">Promedio descarga:</span> <strong style="color:#EB008B;">${avgDescD} min</strong><br><span style="color:var(--color-text-tertiary);font-size:11px;">Total registros:</span> <strong>${total}</strong>`;
   CI['donut']=new Chart(document.getElementById('c_donut'),{
     type:'doughnut',
-    data:{labels:['Carga','Descarga'],datasets:[{data:[nCarga,nDesc],backgroundColor:['#702082','#EB008B'],borderWidth:3,borderColor:'white',hoverOffset:6}]},
+    data:{labels:['Carga','Descarga'],datasets:[{data:[nCarga,nDesc],backgroundColor:['#702082','#EB008B'],borderWidth:4,borderColor:'white',hoverOffset:8}]},
     plugins:[donutCenterPlugin],
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} ops (${Math.round(ctx.raw/(nCarga+nDesc)*100)}%)`}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} ops (${Math.round(ctx.raw/total*100)}%)`}}}
     }
   });
 }
@@ -923,53 +1000,53 @@ function renderCompCharts(){
   CI['comp_gen']=new Chart(document.getElementById('c_comp_gen'),{
     type:'bar',
     data:{labels:allOrdered,datasets:[
-      {label:'Promedio',data:compAvgs,backgroundColor:compColors,borderColor:compBorders,borderWidth:1.5,borderRadius:6},
+      {label:'Promedio',data:compAvgs,backgroundColor:compColors,borderColor:compBorders,borderWidth:0,borderRadius:7},
       {label:'Meta',data:compTgts,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
     plugins:[dividerPlugin,valueLabelPlugin],
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,callbacks:{
         title:ctx=>ctx[0].label,
         label:ctx=>ctx.datasetIndex===0?[` Promedio: ${ctx.raw} min`,` Meta: ${compTgts[ctx.dataIndex]} min`,` ${ctx.raw<=compTgts[ctx.dataIndex]?'✔ En meta':'⚠ +'+(ctx.raw-compTgts[ctx.dataIndex]).toFixed(1)+' min'}`]:` Meta: ${ctx.raw} min`
       }}},
       scales:{
-        y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-        x:{ticks:{font:{size:10},maxRotation:15},grid:{display:false}}
+        y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10,family:"'DM Sans',sans-serif"}},ticks:{font:{size:10,family:"'DM Sans',sans-serif"}},grid:{color:'rgba(0,0,0,0.04)',drawBorder:false}},
+        x:{ticks:{font:{size:10,family:"'DM Sans',sans-serif"},maxRotation:15},grid:{display:false}}
       }
     }
   });
 
-  // ── Variabilidad CARGA — Min / Promedio / Máximo ──
+  // ── Variabilidad CARGA — Floating bars (rango real min→max) ──
   const vcMn=cargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
   const vcAv=cargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
   const vcMx=cargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
   const vcTg=cargaVehs.map(v=>TARGETS[v]);
 
-  // Plugin para mostrar valores min/avg/max dentro/encima de las barras
-  const rangeLabelsPlugin={
-    id:'rangeLabels',
+  const floatLabelC={
+    id:'floatLabelC',
     afterDatasetsDraw(chart){
-      const {ctx}=chart;
-      // Dataset 0 = rango (flotante), Dataset 2 = promedio (línea)
-      const metaRange=chart.getDatasetMeta(0);
-      chart.data.datasets[0].data.forEach((val,i)=>{
-        const bar=metaRange.data[i]; if(!bar)return;
-        const minV=chart.data.datasets[0].data[i][0];
-        const maxV=chart.data.datasets[0].data[i][1];
+      const {ctx,scales:{y}}=chart;
+      const bMeta=chart.getDatasetMeta(0);
+      const aMeta=chart.getDatasetMeta(1);
+      chart.data.datasets[0].data.forEach((range,i)=>{
+        if(!Array.isArray(range))return;
+        const [minV,maxV]=range;
         const avgV=chart.data.datasets[1].data[i];
-        ctx.save();
-        ctx.textAlign='center'; ctx.textBaseline='bottom';
-        // Min label
-        ctx.font='bold 10px -apple-system,sans-serif'; ctx.fillStyle='#702082';
-        ctx.fillText(`min ${minV}`, bar.x, chart.scales.y.getPixelForValue(minV)-2);
-        // Max label
+        const bEl=bMeta.data[i];
+        const aEl=aMeta.data[i];
+        if(!bEl)return;
+        const cx=bEl.x;
+        ctx.save();ctx.font="10px 'DM Sans',sans-serif";ctx.fillStyle='rgba(90,0,120,0.7)';
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(`máx ${maxV}`,cx,y.getPixelForValue(maxV)-5);
         ctx.textBaseline='top';
-        ctx.fillText(`máx ${maxV}`, bar.x, chart.scales.y.getPixelForValue(maxV)+2);
-        // Avg label
-        ctx.textBaseline='middle'; ctx.fillStyle='white';
-        ctx.font='bold 11px -apple-system,sans-serif';
-        ctx.fillText(`avg ${avgV}`, bar.x, chart.scales.y.getPixelForValue(avgV));
+        ctx.fillText(`mín ${minV}`,cx,y.getPixelForValue(minV)+5);
         ctx.restore();
+        if(aEl){
+          ctx.save();ctx.font=`bold 10px 'DM Sans',sans-serif`;
+          ctx.fillStyle='white';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(`${avgV}`,aEl.x,aEl.y);ctx.restore();
+        }
       });
     }
   };
@@ -977,57 +1054,61 @@ function renderCompCharts(){
   CI['var_carga']=new Chart(document.getElementById('c_var_carga'),{
     type:'bar',
     data:{labels:cargaVehs,datasets:[
-      {label:'Rango min–máx',data:vcMn.map((m,i)=>[m,vcMx[i]]),backgroundColor:'rgba(112,32,130,0.18)',borderColor:'rgba(112,32,130,0.4)',borderWidth:1.5,borderRadius:4,borderSkipped:false},
-      {label:'Promedio',data:vcAv,type:'line',borderColor:'#702082',borderWidth:3,pointRadius:8,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0,z:10},
-      {label:'Meta',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+      {label:'Rango min–máx',data:cargaVehs.map((v,i)=>[vcMn[i],vcMx[i]]),backgroundColor:'rgba(112,32,130,0.14)',borderColor:'rgba(112,32,130,0.5)',borderWidth:1.5,borderRadius:6,borderSkipped:false,barPercentage:0.55},
+      {label:'Promedio',data:vcAv,type:'line',borderColor:'#702082',borderWidth:0,pointRadius:18,pointHoverRadius:20,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:2.5,fill:false,tension:0,showLine:false},
+      {label:'Meta objetivo',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
-    plugins:[rangeLabelsPlugin],
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,bottom:4}},
+    plugins:[floatLabelC],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,bottom:14}},
       plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
-        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10,family:"'DM Sans',sans-serif"},boxWidth:12,padding:12,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,titleFont:{family:"'DM Sans',sans-serif",size:12,weight:'600'},callbacks:{
           title:ctx=>ctx[0].label,
           label:ctx=>{
-            if(ctx.datasetIndex===0) return[` Mínimo: ${vcMn[ctx.dataIndex]} min`,` Máximo: ${vcMx[ctx.dataIndex]} min`,` Rango: ${(vcMx[ctx.dataIndex]-vcMn[ctx.dataIndex]).toFixed(1)} min`];
-            if(ctx.datasetIndex===1) return` Promedio: ${ctx.raw} min`;
+            if(ctx.datasetIndex===0)return[` Mínimo: ${ctx.raw[0]} min`,` Máximo: ${ctx.raw[1]} min`,` Rango total: ${(ctx.raw[1]-ctx.raw[0]).toFixed(1)} min`];
+            if(ctx.datasetIndex===1)return` Promedio: ${ctx.raw} min`;
             return` Meta: ${ctx.raw} min`;
           }
         }}
       },
       scales:{
-        y:{beginAtZero:false,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-        x:{ticks:{font:{size:11,weight:'500'}},grid:{display:false}}
+        y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10,family:"'DM Sans',sans-serif"}},ticks:{font:{size:10,family:"'DM Sans',sans-serif"}},grid:{color:'rgba(0,0,0,0.04)',drawBorder:false}},
+        x:{ticks:{font:{size:11,family:"'DM Sans',sans-serif",weight:'500'}},grid:{display:false}}
       }
     }
   });
 
-  // ── Variabilidad DESCARGA ──
+  // ── Variabilidad DESCARGA — Floating bars ──
   const vdMn=descargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
   const vdAv=descargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
   const vdMx=descargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
   const vdTg=descargaVehs.map(v=>TARGETS[v]);
 
-  const rangeLabelsPluginDesc={
-    id:'rangeLabelsDesc',
+  const floatLabelD={
+    id:'floatLabelD',
     afterDatasetsDraw(chart){
-      const {ctx}=chart;
-      const metaRange=chart.getDatasetMeta(0);
-      chart.data.datasets[0].data.forEach((val,i)=>{
-        const bar=metaRange.data[i]; if(!bar)return;
-        const minV=chart.data.datasets[0].data[i][0];
-        const maxV=chart.data.datasets[0].data[i][1];
+      const {ctx,scales:{y}}=chart;
+      const bMeta=chart.getDatasetMeta(0);
+      const aMeta=chart.getDatasetMeta(1);
+      chart.data.datasets[0].data.forEach((range,i)=>{
+        if(!Array.isArray(range))return;
+        const [minV,maxV]=range;
         const avgV=chart.data.datasets[1].data[i];
-        ctx.save();
-        ctx.textAlign='center';
-        ctx.font='bold 10px -apple-system,sans-serif'; ctx.fillStyle='#EB008B';
-        ctx.textBaseline='bottom';
-        ctx.fillText(`min ${minV}`, bar.x, chart.scales.y.getPixelForValue(minV)-2);
+        const bEl=bMeta.data[i];
+        const aEl=aMeta.data[i];
+        if(!bEl)return;
+        const cx=bEl.x;
+        ctx.save();ctx.font="10px 'DM Sans',sans-serif";ctx.fillStyle='rgba(180,0,100,0.7)';
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(`máx ${maxV}`,cx,y.getPixelForValue(maxV)-5);
         ctx.textBaseline='top';
-        ctx.fillText(`máx ${maxV}`, bar.x, chart.scales.y.getPixelForValue(maxV)+2);
-        ctx.textBaseline='middle'; ctx.fillStyle='white';
-        ctx.font='bold 11px -apple-system,sans-serif';
-        ctx.fillText(`avg ${avgV}`, bar.x, chart.scales.y.getPixelForValue(avgV));
+        ctx.fillText(`mín ${minV}`,cx,y.getPixelForValue(minV)+5);
         ctx.restore();
+        if(aEl){
+          ctx.save();ctx.font=`bold 10px 'DM Sans',sans-serif`;
+          ctx.fillStyle='white';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText(`${avgV}`,aEl.x,aEl.y);ctx.restore();
+        }
       });
     }
   };
@@ -1035,26 +1116,26 @@ function renderCompCharts(){
   CI['var_desc']=new Chart(document.getElementById('c_var_desc'),{
     type:'bar',
     data:{labels:descargaVehs,datasets:[
-      {label:'Rango min–máx',data:vdMn.map((m,i)=>[m,vdMx[i]]),backgroundColor:'rgba(235,0,139,0.15)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1.5,borderRadius:4,borderSkipped:false},
-      {label:'Promedio',data:vdAv,type:'line',borderColor:'#EB008B',borderWidth:3,pointRadius:8,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0,z:10},
-      {label:'Meta',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
+      {label:'Rango min–máx',data:descargaVehs.map((v,i)=>[vdMn[i],vdMx[i]]),backgroundColor:'rgba(235,0,139,0.12)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1.5,borderRadius:6,borderSkipped:false,barPercentage:0.55},
+      {label:'Promedio',data:vdAv,type:'line',borderColor:'#EB008B',borderWidth:0,pointRadius:18,pointHoverRadius:20,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:2.5,fill:false,tension:0,showLine:false},
+      {label:'Meta objetivo',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[6,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
     ]},
-    plugins:[rangeLabelsPluginDesc],
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,bottom:4}},
+    plugins:[floatLabelD],
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,bottom:14}},
       plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
-        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10,family:"'DM Sans',sans-serif"},boxWidth:12,padding:12,usePointStyle:true}},
+        tooltip:{backgroundColor:'rgba(20,20,24,0.95)',padding:12,cornerRadius:10,titleFont:{family:"'DM Sans',sans-serif",size:12,weight:'600'},callbacks:{
           title:ctx=>ctx[0].label,
           label:ctx=>{
-            if(ctx.datasetIndex===0) return[` Mínimo: ${vdMn[ctx.dataIndex]} min`,` Máximo: ${vdMx[ctx.dataIndex]} min`,` Rango: ${(vdMx[ctx.dataIndex]-vdMn[ctx.dataIndex]).toFixed(1)} min`];
-            if(ctx.datasetIndex===1) return` Promedio: ${ctx.raw} min`;
+            if(ctx.datasetIndex===0)return[` Mínimo: ${ctx.raw[0]} min`,` Máximo: ${ctx.raw[1]} min`,` Rango total: ${(ctx.raw[1]-ctx.raw[0]).toFixed(1)} min`];
+            if(ctx.datasetIndex===1)return` Promedio: ${ctx.raw} min`;
             return` Meta: ${ctx.raw} min`;
           }
         }}
       },
       scales:{
-        y:{beginAtZero:false,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-        x:{ticks:{font:{size:10},maxRotation:15},grid:{display:false}}
+        y:{beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10,family:"'DM Sans',sans-serif"}},ticks:{font:{size:10,family:"'DM Sans',sans-serif"}},grid:{color:'rgba(0,0,0,0.04)',drawBorder:false}},
+        x:{ticks:{font:{size:10,family:"'DM Sans',sans-serif",weight:'500'},maxRotation:15},grid:{display:false}}
       }
     }
   });
@@ -1620,7 +1701,7 @@ function checkPwd(){
 }
 
 // ══════════════════════════════════════════════════════════
-//  🔥 FIREBASE — Sincronización en tiempo real
+//  🤖 ANÁLISIS CON INTELIGENCIA ARTIFICIAL (Claude API)
 // ══════════════════════════════════════════════════════════
 const SEED_D = D.map(r=>({...r}));    // copia de datos iniciales para sembrar
 const SEED_DT = DT.map(r=>({...r}));
@@ -1703,4 +1784,4 @@ initFirebase();
 </script>
 </body>
 </html>
-
+  
