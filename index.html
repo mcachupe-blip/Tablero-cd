@@ -172,22 +172,48 @@
 
   <div class="g2">
     <div class="cd" style="margin-bottom:0;">
-      <p class="ct">Tendencia semanal de carga</p>
-      <p class="cs">Promedio por semana · ambos tipos de vehículo</p>
+      <p class="ct">Tendencia semanal — CARGA</p>
+      <p class="cs">Promedio por semana · vehículos de distribución a restaurantes</p>
       <div class="leg">
         <span><span class="lsq" style="background:#702082;"></span>Camión 10-12t</span>
-        <span><span class="lsq" style="background:#EB008B;border:2px dashed #EB008B;background:transparent;"></span>Camión 5.4t</span>
+        <span><span class="ldot" style="background:transparent;border:2px dashed #EB008B;"></span>Camión 5.4t</span>
       </div>
       <div style="position:relative;height:200px;">
-        <canvas id="c_trend" role="img" aria-label="Tendencia semanal de tiempos de carga por tipo de vehículo">Tendencia semanal de carga.</canvas>
+        <canvas id="c_trend" role="img" aria-label="Tendencia semanal de tiempos de carga">Tendencia semanal carga.</canvas>
       </div>
     </div>
+    <div class="cd" style="margin-bottom:0;">
+      <p class="ct">Tendencia semanal — DESCARGA</p>
+      <p class="cs">Promedio por semana · vehículos de recepción de proveedores</p>
+      <div class="leg">
+        <span><span class="lsq" style="background:#EB008B;"></span>Furgón 22 tar.</span>
+        <span><span class="lsq" style="background:#378ADD;border:2px dashed #378ADD;background:transparent;"></span>Furgón 26 tar.</span>
+        <span><span class="lsq" style="background:#27AE60;border:2px dotted #27AE60;background:transparent;"></span>Granel / Pallets</span>
+      </div>
+      <div style="position:relative;height:200px;">
+        <canvas id="c_trend_desc" role="img" aria-label="Tendencia semanal de tiempos de descarga">Tendencia semanal descarga.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:0;">
     <div class="cd" style="margin-bottom:0;">
       <p class="ct">Distribución de operaciones registradas</p>
       <p class="cs">Mix de carga vs descarga en el período</p>
       <div id="leg_donut" class="leg" style="margin-bottom:8px;"></div>
-      <div style="position:relative;height:200px;">
-        <canvas id="c_donut" role="img" aria-label="Gráfica de dona mostrando distribución de operaciones de carga y descarga">Distribución carga vs descarga.</canvas>
+      <div style="position:relative;height:180px;">
+        <canvas id="c_donut" role="img" aria-label="Distribución carga vs descarga">Distribución carga vs descarga.</canvas>
+      </div>
+    </div>
+    <div class="cd" style="margin-bottom:0;">
+      <p class="ct">Promedio semanal global</p>
+      <p class="cs">Promedio de todas las operaciones por semana</p>
+      <div class="leg">
+        <span><span class="lsq" style="background:#702082;"></span>Promedio Carga</span>
+        <span><span class="lsq" style="background:#EB008B;"></span>Promedio Descarga</span>
+      </div>
+      <div style="position:relative;height:180px;">
+        <canvas id="c_trend_global" role="img" aria-label="Promedio semanal global">Promedio semanal global.</canvas>
       </div>
     </div>
   </div>
@@ -713,7 +739,7 @@ function rk(){
 }
 
 function renderDashCharts(){
-  xc('rank');xc('trend');xc('donut');
+  xc('rank');xc('trend');xc('trend_desc');xc('trend_global');xc('donut');
 
   const pairs=[...ALL_VEHS].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
   const barColors=pairs.map(p=>p.a<=p.tgt?'rgba(39,174,96,0.85)':p.a<=p.tgt*1.3?'rgba(243,156,18,0.85)':'rgba(231,76,60,0.85)');
@@ -807,30 +833,70 @@ function renderDashCharts(){
   notas.push(`📈 <strong>Promedio general:</strong> ${promGeneral} min · <strong>${D.length}</strong> registros totales.`);
   notaEl.innerHTML=notas.map(n=>`<div style="padding:4px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);line-height:1.5;">${n}</div>`).join('');
 
-  // ── Tendencia semanal — CARGA y DESCARGA ──
+  // ── Tendencia semanal — CARGA (solo vehículos de carga) ──
   const sems=[...new Set(D.map(r=>r.sem))].sort();
   const t10=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
   const t54=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tF26=sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
 
+  const lineOpts=(color,dash=[],fill=false,bg='transparent')=>({
+    borderColor:color,backgroundColor:bg,tension:0.3,
+    pointRadius:5,pointBackgroundColor:color,pointBorderColor:'white',
+    pointBorderWidth:1.5,borderDash:dash,fill,spanGaps:true,borderWidth:2
+  });
+  const chartOpts=(yLabel)=>({
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,
+        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+    },
+    scales:{
+      y:{title:{display:true,text:yLabel||'Minutos',font:{size:10}},
+         ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+      x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+    }
+  });
+
+  xc('trend');
   CI['trend']=new Chart(document.getElementById('c_trend'),{
     type:'line',
     data:{labels:sems,datasets:[
-      {label:'Camión 10-12t',data:t10,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.07)',tension:0.3,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:1.5,fill:true,spanGaps:false},
-      {label:'Camión 5.4t',data:t54,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[6,3],fill:true,spanGaps:false},
-      {label:'Furgón 26 tar.',data:tF26,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#378ADD',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[3,3],fill:false,spanGaps:false},
+      {label:'Camión 10-12t',data:t10,...lineOpts('#702082',[],true,'rgba(112,32,130,0.07)')},
+      {label:'Camión 5.4t',  data:t54,...lineOpts('#EB008B',[6,3],true,'rgba(235,0,139,0.04)')},
     ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:12,padding:10,usePointStyle:true}},
-        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
-      },
-      scales:{
-        y:{title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
-      }
-    }
+    options:chartOpts('Minutos — Carga')
+  });
+
+  // ── Tendencia semanal — DESCARGA (solo vehículos de descarga) ──
+  const tF22 =sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 22 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tF26 =sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tGran=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión granel'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tPall=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión pallets'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+
+  xc('trend_desc');
+  CI['trend_desc']=new Chart(document.getElementById('c_trend_desc'),{
+    type:'line',
+    data:{labels:sems,datasets:[
+      {label:'Furgón 22 tar.',data:tF22, ...lineOpts('#EB008B',[])},
+      {label:'Furgón 26 tar.',data:tF26, ...lineOpts('#378ADD',[5,3])},
+      {label:'Camión granel', data:tGran,...lineOpts('#E67E22',[3,3])},
+      {label:'Camión pallets',data:tPall,...lineOpts('#27AE60',[2,4])},
+    ]},
+    options:chartOpts('Minutos — Descarga')
+  });
+
+  // ── Promedio semanal global (carga vs descarga) ──
+  const tAvgC=sems.map(s=>{const t=D.filter(r=>r.tipo==='Carga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const tAvgD=sems.map(s=>{const t=D.filter(r=>r.tipo==='Descarga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+
+  xc('trend_global');
+  CI['trend_global']=new Chart(document.getElementById('c_trend_global'),{
+    type:'line',
+    data:{labels:sems,datasets:[
+      {label:'Promedio Carga',   data:tAvgC,...lineOpts('#702082',[],true,'rgba(112,32,130,0.08)')},
+      {label:'Promedio Descarga',data:tAvgD,...lineOpts('#EB008B',[5,3],true,'rgba(235,0,139,0.05)')},
+    ]},
+    options:chartOpts('Minutos (promedio global)')
   });
 
   // ── Donut con centro ──
@@ -1660,5 +1726,3 @@ initFirebase();
 </script>
 </body>
 </html>
-
-  
