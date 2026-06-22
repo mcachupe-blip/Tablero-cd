@@ -7,6 +7,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     @keyframes spin{to{transform:rotate(360deg);}}
     /* ── Variables de diseño ── */
@@ -143,6 +145,7 @@
   <button class="tb" onclick="gt('reg',this)">Registro</button>
   <button class="tb" onclick="gt('trec',this)">Recepción</button>
   <button class="tb" onclick="gt('mej',this)">Mejoras</button>
+  <button class="tb" onclick="gt('rep',this)">Reportes</button>
 </div>
 
 <!-- DASHBOARD -->
@@ -174,35 +177,28 @@
     <div class="cd" style="margin-bottom:0;">
       <p class="ct">Tendencia semanal — CARGA</p>
       <p class="cs">Promedio por semana · vehículos de distribución a restaurantes</p>
-      <div class="leg">
-        <span><span class="lsq" style="background:#702082;"></span>Camión 10-12t</span>
-        <span><span class="ldot" style="background:transparent;border:2px dashed #EB008B;"></span>Camión 5.4t</span>
-      </div>
+      <div class="leg" id="leg_trend_carga"></div>
       <div style="position:relative;height:200px;">
-        <canvas id="c_trend" role="img" aria-label="Tendencia semanal de tiempos de carga">Tendencia semanal carga.</canvas>
+        <canvas id="c_trend_carga" role="img" aria-label="Tendencia semanal de tiempos de carga por tipo de vehículo">Tendencia semanal de carga.</canvas>
       </div>
     </div>
     <div class="cd" style="margin-bottom:0;">
       <p class="ct">Tendencia semanal — DESCARGA</p>
       <p class="cs">Promedio por semana · vehículos de recepción de proveedores</p>
-      <div class="leg">
-        <span><span class="lsq" style="background:#EB008B;"></span>Furgón 22 tar.</span>
-        <span><span class="lsq" style="background:#378ADD;border:2px dashed #378ADD;background:transparent;"></span>Furgón 26 tar.</span>
-        <span><span class="lsq" style="background:#27AE60;border:2px dotted #27AE60;background:transparent;"></span>Granel / Pallets</span>
-      </div>
+      <div class="leg" id="leg_trend_desc"></div>
       <div style="position:relative;height:200px;">
-        <canvas id="c_trend_desc" role="img" aria-label="Tendencia semanal de tiempos de descarga">Tendencia semanal descarga.</canvas>
+        <canvas id="c_trend_desc" role="img" aria-label="Tendencia semanal de tiempos de descarga por tipo de vehículo">Tendencia semanal de descarga.</canvas>
       </div>
     </div>
   </div>
 
-  <div class="g2" style="margin-top:0;">
+  <div class="g2">
     <div class="cd" style="margin-bottom:0;">
       <p class="ct">Distribución de operaciones registradas</p>
       <p class="cs">Mix de carga vs descarga en el período</p>
       <div id="leg_donut" class="leg" style="margin-bottom:8px;"></div>
-      <div style="position:relative;height:180px;">
-        <canvas id="c_donut" role="img" aria-label="Distribución carga vs descarga">Distribución carga vs descarga.</canvas>
+      <div style="position:relative;height:200px;">
+        <canvas id="c_donut" role="img" aria-label="Gráfica de dona mostrando distribución de operaciones de carga y descarga">Distribución carga vs descarga.</canvas>
       </div>
     </div>
     <div class="cd" style="margin-bottom:0;">
@@ -212,8 +208,8 @@
         <span><span class="lsq" style="background:#702082;"></span>Promedio Carga</span>
         <span><span class="lsq" style="background:#EB008B;"></span>Promedio Descarga</span>
       </div>
-      <div style="position:relative;height:180px;">
-        <canvas id="c_trend_global" role="img" aria-label="Promedio semanal global">Promedio semanal global.</canvas>
+      <div style="position:relative;height:200px;">
+        <canvas id="c_prom_global" role="img" aria-label="Promedio semanal global de carga y descarga">Promedio semanal global.</canvas>
       </div>
     </div>
   </div>
@@ -325,12 +321,45 @@
       </div>
     </div>
   </div>
+
+  <!-- ══ IMPACTO Y EVOLUCIÓN ══ -->
+  <div style="display:flex;align-items:center;gap:10px;margin:18px 0 12px;">
+    <div style="height:2px;flex:1;background:rgba(255,199,44,0.35);border-radius:2px;"></div>
+    <span style="background:#FFC72C;color:#1d1d1f;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#1d1d1f" stroke-width="1.4"/><path d="M7 4v3.2l2.2 1.3" stroke="#1d1d1f" stroke-width="1.4" stroke-linecap="round"/></svg>
+      IMPACTO Y EVOLUCIÓN PARA GERENCIA
+    </span>
+    <div style="height:2px;flex:1;background:rgba(255,199,44,0.35);border-radius:2px;"></div>
+  </div>
+
+  <div class="cd">
+    <p class="ct">Costo operativo de la brecha vs. meta — horas-hombre estimadas</p>
+    <p class="cs">Minutos perdidos por encima de la meta, multiplicados por el número de registros — convertido a horas-hombre semanales. Esta es la cifra que justifica priorizar un proceso sobre otro.</p>
+    <div id="impacto_grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;"></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Reg.</th><th>Prom.</th><th>Meta</th><th>Exceso/op.</th><th>Horas-hombre perdidas</th></tr></thead>
+        <tbody id="impacto_tb"></tbody>
+      </table>
+    </div>
+    <div class="insight" style="margin-top:10px;margin-bottom:0;" id="impacto_insight"></div>
+  </div>
+
+  <div class="cd">
+    <p class="ct">Evolución mensual del CD — ¿mejoramos o empeoramos?</p>
+    <p class="cs">Promedio de todas las operaciones por mes · permite ver si el centro de distribución está mejorando su desempeño en el tiempo</p>
+    <div class="leg" id="leg_evol_mes"></div>
+    <div style="position:relative;height:230px;">
+      <canvas id="c_evol_mes" role="img" aria-label="Evolución mensual del promedio de tiempos de operación">Evolución mensual.</canvas>
+    </div>
+    <div class="insight" style="margin-top:10px;margin-bottom:0;" id="evol_mes_insight"></div>
+  </div>
 </div>
 
 <!-- REGISTRO -->
 <div id="preg" class="pnl">
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-    <select id="fm" onchange="rt()" style="width:auto;"><option value="">Todos los meses</option><option>Marzo</option><option>Abril</option><option>Mayo</option></select>
+    <select id="fm" onchange="rt()" style="width:auto;"><option value="">Todos los meses</option><option>Marzo</option><option>Abril</option></select>
     <select id="ft" onchange="rt()" style="width:auto;"><option value="">Carga y descarga</option><option>Carga</option><option>Descarga</option></select>
     <select id="fv" onchange="rt()" style="width:auto;"><option value="">Todos los vehículos</option><option>Camión 10-12t</option><option>Camión 5.4t</option><option>Furgón 22 tar.</option><option>Furgón 26 tar.</option><option>Camión granel</option><option>Camión pallets</option></select>
     <span style="margin-left:auto;font-size:11px;color:var(--color-text-tertiary);" id="rc"></span>
@@ -444,8 +473,8 @@
   <div style="background:#702082;color:white;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div>
-        <p style="font-weight:500;font-size:14px;">Plan de mejoras operacionales — metodología Lean</p>
-        <p style="font-size:11px;opacity:0.7;margin-top:3px;">Basado en análisis de tiempos registrados en el CD · Ordenado por impacto y prioridad</p>
+        <p style="font-weight:500;font-size:14px;">Plan de mejoras — resumen ejecutivo</p>
+        <p style="font-size:11px;opacity:0.7;margin-top:3px;">Problema, impacto, acción y responsable sugerido · generado a partir de los tiempos registrados en el CD</p>
       </div>
     </div>
   </div>
@@ -457,6 +486,42 @@
     <div style="background:rgba(39,174,96,0.08);border:0.5px solid rgba(39,174,96,0.2);border-radius:var(--border-radius-md);padding:12px;text-align:center;"><p style="font-size:20px;font-weight:500;color:#27AE60;" id="cb">--</p><p style="font-size:11px;color:#27AE60;">Prioridad baja</p></div>
   </div>
   <div id="ml"></div>
+</div>
+
+<!-- REPORTES -->
+<div id="prep" class="pnl">
+  <div style="background:#702082;color:white;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+    <p style="font-weight:500;font-size:14px;">Generación de reportes ejecutivos</p>
+    <p style="font-size:11px;opacity:0.7;margin-top:3px;">Exporta el estado del control operativo del CD para Gerencia de Logística — PDF ejecutivo o Excel de respaldo</p>
+  </div>
+
+  <div class="cd">
+    <p class="ct">Filtro del período a exportar</p>
+    <p class="cs">Aplica a ambos formatos de exportación. Deja en blanco para incluir todo el histórico.</p>
+    <div class="fg2">
+      <div class="fg"><label>Mes (opcional)</label>
+        <select id="rep_mes"><option value="">Todos los meses</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option></select>
+      </div>
+      <div class="fg"><label>Tipo de operación (opcional)</label>
+        <select id="rep_tipo"><option value="">Carga y descarga</option><option>Carga</option><option>Descarga</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd">
+    <div class="mi" style="background:rgba(231,76,60,0.1);color:#E74C3C;width:38px;height:38px;margin-bottom:10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" stroke="#E74C3C" stroke-width="1.6"/><path d="M15 2v5h5" stroke="#E74C3C" stroke-width="1.6"/></svg>
+    </div>
+    <p class="ct">Reporte Ejecutivo (PDF)</p>
+    <p class="cs">Una página lista para enviar a Gerencia de Logística: KPIs del período, ranking de operaciones vs. meta, hallazgos críticos y plan de acción priorizado.</p>
+    <button onclick="generarPDF()" style="background:#702082;color:white;border:none;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;width:100%;margin-top:6px;">📄 Generar PDF Ejecutivo</button>
+  </div>
+
+  <div class="insight" style="margin-top:4px;">
+    <strong>Autoría y control:</strong> Este reporte es generado y administrado por <strong>Mario Alexander Cachupe Santos</strong>, Ingeniero de Operaciones — Supply Chain, como parte del sistema de control de tiempos operativos del CD Taco Bell Guatemala. Los datos provienen de toma de tiempos en sitio, registrados y validados directamente en este tablero.
+  </div>
+
+  <div id="rep_status" style="display:none;margin-top:8px;padding:10px 13px;border-radius:8px;font-size:12px;"></div>
 </div>
 
 </div><!-- /.wrapper -->
@@ -492,7 +557,6 @@
 </div>
 
 <script>
-// ── Datos recuperados de Firebase (S-01 → S-13) · 58 registros ──
 let D=[
   {id:1,mes:'Marzo',sem:'S-01',tipo:'Carga',veh:'Camión 10-12t',t:22.13,p:null,prov:'',obs:''},
   {id:2,mes:'Marzo',sem:'S-01',tipo:'Carga',veh:'Camión 5.4t',t:48.2,p:null,prov:'',obs:''},
@@ -519,56 +583,24 @@ let D=[
   {id:23,mes:'Abril',sem:'S-06',tipo:'Carga',veh:'Camión 10-12t',t:17.32,p:null,prov:'',obs:''},
   {id:24,mes:'Abril',sem:'S-06',tipo:'Descarga',veh:'Furgón 26 tar.',t:27.25,p:1,prov:'Local',obs:'Panifresh 26 tarimas — solo 1 colaborador, operación más lenta'},
   {id:25,mes:'Abril',sem:'S-06',tipo:'Descarga',veh:'Furgón 26 tar.',t:27.1,p:1,prov:'Local',obs:'Panifresh 26 tarimas — solo 1 colaborador'},
+  // ── Semana 4 Abril (S-08) ──
   {id:26,mes:'Abril',sem:'S-08',tipo:'Carga',veh:'Camión 5.4t',t:24.58,p:null,prov:'',obs:'Pedido menor — proceso fluido sin inconvenientes'},
   {id:27,mes:'Abril',sem:'S-08',tipo:'Carga',veh:'Camión 5.4t',t:28.07,p:null,prov:'',obs:'Carga 25/04 — pocos pedidos, proceso fluido'},
   {id:28,mes:'Abril',sem:'S-08',tipo:'Carga',veh:'Camión 5.4t',t:42.3,p:null,prov:'',obs:'Carga 25/04 — cantidad alta de pedidos, camión abastecido en su totalidad'},
+  // ── Semana 5 Abril (S-09) ──
   {id:29,mes:'Abril',sem:'S-09',tipo:'Carga',veh:'Camión 5.4t',t:36.23,p:null,prov:'',obs:'Carga 29/04 — camión no fue lleno, se dirigió a Recursos Selectivos'},
   {id:30,mes:'Abril',sem:'S-09',tipo:'Carga',veh:'Camión 5.4t',t:69.13,p:null,prov:'',obs:'Carga 29/04 — camión llenado en su totalidad'},
   {id:31,mes:'Abril',sem:'S-09',tipo:'Descarga',veh:'Furgón 26 tar.',t:27.54,p:2,prov:'Local',obs:'Panifresh 26 tar. — 1 auxiliar + montacarguista'},
   {id:32,mes:'Abril',sem:'S-09',tipo:'Descarga',veh:'Furgón 26 tar.',t:48.05,p:2,prov:'Local',obs:'Ingrup 26 tar. — tarimas cruzadas, esfuerzo mayor, operación muy lenta'},
   {id:33,mes:'Abril',sem:'S-09',tipo:'Descarga',veh:'Furgón 26 tar.',t:19.29,p:3,prov:'Local',obs:'Ingrup 26 tar. — 2 auxiliares + montacarguista, descarga muy eficiente y rápida'},
-  // ── Mayo S-10 ──
-  {id:34,mes:'Mayo',sem:'S-10',tipo:'Descarga',veh:'Furgón 26 tar.',t:28.49,p:3,prov:'Local',obs:'Proveedor Panifresh , descargado por 2 auxiliares y un montacarguista, proceso estable'},
-  {id:35,mes:'Mayo',sem:'S-10',tipo:'Descarga',veh:'Furgón 26 tar.',t:40.15,p:3,prov:'Importado',obs:'Furgón de 24 tarimas de producto importado, proceso lento al descargar debido a tarimas mal embaladas'},
-  {id:36,mes:'Mayo',sem:'S-10',tipo:'Descarga',veh:'Furgón 26 tar.',t:28.49,p:3,prov:'Local',obs:'Descarga de furgón de panifresh'},
-  {id:37,mes:'Mayo',sem:'S-10',tipo:'Carga',veh:'Camión 5.4t',t:81.09,p:null,prov:'',obs:'Proceso de carga demasiado lento, ya que no había una coordinación clara'},
-  {id:38,mes:'Mayo',sem:'S-10',tipo:'Carga',veh:'Camión 5.4t',t:38.32,p:null,prov:'',obs:'Proceso de carga con mejora de tiempo'},
-  // ── Mayo S-11 ──
-  {id:39,mes:'Mayo',sem:'S-11',tipo:'Carga',veh:'Camión 5.4t',t:48.43,p:null,prov:'',obs:'El proceso aun sigue deficiente debido a que no hay un orden estandarizado de carga'},
-  {id:40,mes:'Mayo',sem:'S-11',tipo:'Carga',veh:'Camión 5.4t',t:37.18,p:null,prov:'',obs:'Proceso de carga mas eficiente debido al tamaño de carga'},
-  {id:41,mes:'Mayo',sem:'S-11',tipo:'Descarga',veh:'Furgón 22 tar.',t:31.4,p:3,prov:'Importado',obs:'en el proceso de descarga participaron 2 auxiliares y un montacarguista siendo un total de 22 tarimas descargadas'},
-  {id:42,mes:'Mayo',sem:'S-11',tipo:'Carga',veh:'Camión 5.4t',t:40.36,p:null,prov:'',obs:'Proceso de carga eficiente , solo falta mejorar un poco la coordinación para que se reduzcan los tiempos'},
-  {id:43,mes:'Mayo',sem:'S-11',tipo:'Descarga',veh:'Furgón 26 tar.',t:21.44,p:2,prov:'Local',obs:'El proceso de descarga fue eficiente , y una tarima venía cruzada y trabada por lo que retardó el proceso de descarga'},
-  // ── Mayo S-12 ──
-  {id:45,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 10-12t',t:18.31,p:null,prov:'',obs:'El proceso de carga fue interrumpido debido a un retraso por parte del operador de la empresa de transporte contratada al momento de acomodar las tarimas dentro de la unidad.'},
-  {id:46,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 10-12t',t:24.47,p:null,prov:'',obs:'El proceso de carga fue interrumpido debido a un retraso por parte del operador de la empresa de transporte contratada al momento de acomodar las tarimas dentro de la unidad.'},
-  {id:47,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 5.4t',t:38.39,p:null,prov:'',obs:'Proceso de carga estable y eficiente'},
-  {id:48,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 5.4t',t:41.42,p:null,prov:'',obs:'Proceso de carga estable con un poco de demora al momento de acomodar producto.'},
-  {id:49,mes:'Mayo',sem:'S-12',tipo:'Descarga',veh:'Furgón 26 tar.',t:31.22,p:2,prov:'Importado',obs:'Furgón contaba con 24 tarimas'},
-  {id:50,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 5.4t',t:41.18,p:null,prov:'',obs:'Proceso ordenado y eficiente al momento de cargar'},
-  {id:51,mes:'Mayo',sem:'S-12',tipo:'Descarga',veh:'Furgón 22 tar.',t:24.28,p:3,prov:'Local',obs:'Proceso eficiente sin ningún inconveniente'},
-  {id:52,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 5.4t',t:50.5,p:null,prov:'',obs:'Proceso de carga lento debido a falta de personal por tema de excursión.'},
-  {id:53,mes:'Mayo',sem:'S-12',tipo:'Carga',veh:'Camión 5.4t',t:43.21,p:null,prov:'',obs:'Proceso de carga lento debido a falta de personal por tema de excursión.'},
-  {id:54,mes:'Mayo',sem:'S-12',tipo:'Descarga',veh:'Furgón 26 tar.',t:21.54,p:2,prov:'Local',obs:'Operador 1 inició descarga de 3 minutos pero se ocupó y operador 2 realizó la descarga restante de contenedor de panifresh'},
-  // ── Mayo S-13 ──
-  {id:56,mes:'Mayo',sem:'S-13',tipo:'Carga',veh:'Camión 10-12t',t:22.13,p:null,prov:'',obs:'Proceso de carga sin ningún inconveniente'},
-  {id:57,mes:'Mayo',sem:'S-13',tipo:'Carga',veh:'Camión 10-12t',t:23.44,p:null,prov:'',obs:'Proceso lento debido a falta de espacio para maniobrar montacargas'},
-  {id:58,mes:'Mayo',sem:'S-13',tipo:'Carga',veh:'Camión 5.4t',t:48.12,p:null,prov:'',obs:'El proceso de despacho presenta demoras críticas debido a la falta de estandarización en los métodos de estiba. Asimismo, la ausencia de roles específicos genera un flujo de trabajo desordenado, donde el personal se desplaza entre unidades sin una asignación fija.'},
-  {id:59,mes:'Mayo',sem:'S-13',tipo:'Carga',veh:'Camión 5.4t',t:52.34,p:null,prov:'',obs:'El proceso de despacho presenta demoras críticas debido a la falta de estandarización en los métodos de estiba. Asimismo, la ausencia de roles específicos genera un flujo de trabajo desordenado, donde el personal se desplaza entre unidades sin una asignación fija.'},
-  {id:60,mes:'Mayo',sem:'S-13',tipo:'Descarga',veh:'Furgón 26 tar.',t:62.35,p:null,prov:'Importado',obs:'El proceso de descarga fue lento debido a que tarimas venían cara a cara por lo que representa un atraso significativo para la operación'},
 ];
-let nid=61;
+let nid=34;
 
-// ── Datos de Trasiego (Toma de Tiempos Trasiego) ── recuperados de Firebase
+// ── Datos de Trasiego (Toma de Tiempos Trasiego) ──
 const DT=[
   {id:1,mes:'Abril',congelado:33.57,refrigerado:7,personas:5,cajas:260,camion:'Camión 5.4 ton',obs:''},
-  {id:3,mes:'Mayo',congelado:10.38,refrigerado:4.12,personas:4,cajas:38,camion:'Panel',obs:'Proceso de trasiego de producto eficiente y estable'},
-  {id:4,mes:'Mayo',congelado:34.02,refrigerado:4.21,personas:7,cajas:277,camion:'Camión 5.4 ton',obs:''},
-  {id:5,mes:'Mayo',congelado:22.16,refrigerado:1.49,personas:7,cajas:229,camion:'Camión 5.4 ton',obs:'Proceso eficiente debido a pedido menor'},
-  {id:6,mes:'Mayo',congelado:25.13,refrigerado:6.05,personas:7,cajas:276,camion:'Camión 5.4 ton',obs:'Proceso estable sin inconveniente alguno'},
-  {id:7,mes:'Mayo',congelado:22.54,refrigerado:1.49,personas:5,cajas:202,camion:'Camión 5.4 ton',obs:'Proceso estable, únicamente participaron 5 personas debido a que 2 personas estaban validando su producto en su unidad.'},
 ];
-let ntid=8;
+let ntid=2;
 
 // ══════════════════════════════════════════════════════════════════
 //  🔥 CONFIGURACIÓN FIREBASE — COMPLETAR DESPUÉS DE CREAR PROYECTO
@@ -739,7 +771,7 @@ function rk(){
 }
 
 function renderDashCharts(){
-  xc('rank');xc('trend');xc('trend_desc');xc('trend_global');xc('donut');
+  xc('rank');xc('trend_carga');xc('trend_desc');xc('donut');xc('prom_global');
 
   const pairs=[...ALL_VEHS].map(v=>({v,a:+av(getVehData(v)).toFixed(1),tgt:TARGETS[v],cnt:getVehData(v).length})).filter(p=>p.cnt>0).sort((a,b)=>a.a-b.a);
   const barColors=pairs.map(p=>p.a<=p.tgt?'rgba(39,174,96,0.85)':p.a<=p.tgt*1.3?'rgba(243,156,18,0.85)':'rgba(231,76,60,0.85)');
@@ -833,70 +865,63 @@ function renderDashCharts(){
   notas.push(`📈 <strong>Promedio general:</strong> ${promGeneral} min · <strong>${D.length}</strong> registros totales.`);
   notaEl.innerHTML=notas.map(n=>`<div style="padding:4px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);line-height:1.5;">${n}</div>`).join('');
 
-  // ── Tendencia semanal — CARGA (solo vehículos de carga) ──
+  // ── Tendencia semanal — CARGA (vehículos de distribución) ──
   const sems=[...new Set(D.map(r=>r.sem))].sort();
-  const t10=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 10-12t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const t54=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión 5.4t'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-
-  const lineOpts=(color,dash=[],fill=false,bg='transparent')=>({
-    borderColor:color,backgroundColor:bg,tension:0.3,
-    pointRadius:5,pointBackgroundColor:color,pointBorderColor:'white',
-    pointBorderWidth:1.5,borderDash:dash,fill,spanGaps:true,borderWidth:2
+  const colorCarga={'Camión 10-12t':{c:'#702082',dash:[]},'Camión 5.4t':{c:'#EB008B',dash:[6,3]}};
+  const seriesCarga=vc.map(v=>{
+    const data=sems.map(s=>{const t=D.filter(r=>r.veh===v&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+    const col=colorCarga[v]||{c:'#702082',dash:[]};
+    return {label:v,data,borderColor:col.c,backgroundColor:col.c+'12',tension:0.3,pointRadius:5,pointBackgroundColor:col.c,pointBorderColor:'white',pointBorderWidth:1.5,borderDash:col.dash,fill:true,spanGaps:false};
   });
-  const chartOpts=(yLabel)=>({
-    responsive:true,maintainAspectRatio:false,
-    plugins:{
-      legend:{display:false},
-      tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,
-        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
-    },
-    scales:{
-      y:{title:{display:true,text:yLabel||'Minutos',font:{size:10}},
-         ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
-      x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+  document.getElementById('leg_trend_carga').innerHTML=vc.map(v=>{
+    const col=(colorCarga[v]||{c:'#702082'}).c;
+    const dashed=colorCarga[v]&&colorCarga[v].dash.length;
+    return `<span><span class="lsq" style="background:${dashed?'transparent':col};border:${dashed?'2px dashed '+col:'none'};"></span>${v}</span>`;
+  }).join('');
+
+  CI['trend_carga']=new Chart(document.getElementById('c_trend_carga'),{
+    type:'line',
+    data:{labels:sems,datasets:seriesCarga},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'Minutos — Carga',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+      }
     }
   });
 
-  xc('trend');
-  CI['trend']=new Chart(document.getElementById('c_trend'),{
-    type:'line',
-    data:{labels:sems,datasets:[
-      {label:'Camión 10-12t',data:t10,...lineOpts('#702082',[],true,'rgba(112,32,130,0.07)')},
-      {label:'Camión 5.4t',  data:t54,...lineOpts('#EB008B',[6,3],true,'rgba(235,0,139,0.04)')},
-    ]},
-    options:chartOpts('Minutos — Carga')
+  // ── Tendencia semanal — DESCARGA (vehículos de recepción) ──
+  const colorDesc={'Furgón 22 tar.':{c:'#EB008B',dash:[]},'Furgón 26 tar.':{c:'#378ADD',dash:[6,3]},'Camión granel':{c:'#1D9E75',dash:[2,2]},'Camión pallets':{c:'#1D9E75',dash:[2,2]}};
+  const seriesDesc=vd.map(v=>{
+    const data=sems.map(s=>{const t=D.filter(r=>r.veh===v&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+    const col=colorDesc[v]||{c:'#378ADD',dash:[]};
+    return {label:v,data,borderColor:col.c,backgroundColor:col.c+'12',tension:0.3,pointRadius:5,pointBackgroundColor:col.c,pointBorderColor:'white',pointBorderWidth:1.5,borderDash:col.dash,fill:false,spanGaps:false};
   });
+  document.getElementById('leg_trend_desc').innerHTML=vd.map(v=>{
+    const col=(colorDesc[v]||{c:'#378ADD'}).c;
+    const dashed=colorDesc[v]&&colorDesc[v].dash.length;
+    return `<span><span class="lsq" style="background:${dashed?'transparent':col};border:${dashed?'2px dashed '+col:'none'};"></span>${v}</span>`;
+  }).join('');
 
-  // ── Tendencia semanal — DESCARGA (solo vehículos de descarga) ──
-  const tF22 =sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 22 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tF26 =sems.map(s=>{const t=D.filter(r=>r.veh==='Furgón 26 tar.'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tGran=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión granel'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tPall=sems.map(s=>{const t=D.filter(r=>r.veh==='Camión pallets'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-
-  xc('trend_desc');
   CI['trend_desc']=new Chart(document.getElementById('c_trend_desc'),{
     type:'line',
-    data:{labels:sems,datasets:[
-      {label:'Furgón 22 tar.',data:tF22, ...lineOpts('#EB008B',[])},
-      {label:'Furgón 26 tar.',data:tF26, ...lineOpts('#378ADD',[5,3])},
-      {label:'Camión granel', data:tGran,...lineOpts('#E67E22',[3,3])},
-      {label:'Camión pallets',data:tPall,...lineOpts('#27AE60',[2,4])},
-    ]},
-    options:chartOpts('Minutos — Descarga')
-  });
-
-  // ── Promedio semanal global (carga vs descarga) ──
-  const tAvgC=sems.map(s=>{const t=D.filter(r=>r.tipo==='Carga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-  const tAvgD=sems.map(s=>{const t=D.filter(r=>r.tipo==='Descarga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
-
-  xc('trend_global');
-  CI['trend_global']=new Chart(document.getElementById('c_trend_global'),{
-    type:'line',
-    data:{labels:sems,datasets:[
-      {label:'Promedio Carga',   data:tAvgC,...lineOpts('#702082',[],true,'rgba(112,32,130,0.08)')},
-      {label:'Promedio Descarga',data:tAvgD,...lineOpts('#EB008B',[5,3],true,'rgba(235,0,139,0.05)')},
-    ]},
-    options:chartOpts('Minutos (promedio global)')
+    data:{labels:sems,datasets:seriesDesc},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'Minutos — Descarga',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+      }
+    }
   });
 
   // ── Donut con centro ──
@@ -911,6 +936,29 @@ function renderDashCharts(){
     plugins:[donutCenterPlugin],
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} ops (${Math.round(ctx.raw/(nCarga+nDesc)*100)}%)`}}}
+    }
+  });
+
+  // ── Promedio semanal global (Carga vs Descarga, todas las semanas) ──
+  const promCargaSem=sems.map(s=>{const t=D.filter(r=>r.tipo==='Carga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const promDescSem=sems.map(s=>{const t=D.filter(r=>r.tipo==='Descarga'&&r.sem===s).map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+
+  CI['prom_global']=new Chart(document.getElementById('c_prom_global'),{
+    type:'line',
+    data:{labels:sems,datasets:[
+      {label:'Promedio Carga',data:promCargaSem,borderColor:'#702082',backgroundColor:'rgba(112,32,130,0.07)',tension:0.3,pointRadius:5,pointBackgroundColor:'#702082',pointBorderColor:'white',pointBorderWidth:1.5,fill:true,spanGaps:false},
+      {label:'Promedio Descarga',data:promDescSem,borderColor:'#EB008B',backgroundColor:'rgba(235,0,139,0.04)',tension:0.3,pointRadius:5,pointBackgroundColor:'#EB008B',pointBorderColor:'white',pointBorderWidth:1.5,borderDash:[6,3],fill:true,spanGaps:false}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} min`}}
+      },
+      scales:{
+        y:{title:{display:true,text:'Minutos (promedio global)',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        x:{ticks:{font:{size:10},autoSkip:false,maxRotation:30},grid:{display:false}}
+      }
     }
   });
 }
@@ -1191,6 +1239,114 @@ function renderCompCharts(){
       }
     }
   });
+
+  renderImpactoYEvolucion();
+}
+
+// ══════════════════════════════════════════════════════════
+//  💼 IMPACTO EN HORAS-HOMBRE Y EVOLUCIÓN MENSUAL
+// ══════════════════════════════════════════════════════════
+function renderImpactoYEvolucion(){
+  xc('evol_mes');
+
+  // ── Impacto: minutos perdidos sobre meta → horas-hombre ──
+  const filasImpacto=ALL_VEHS.map(v=>{
+    const data=getVehData(v);
+    if(!data.length)return null;
+    const avgT=+av(data).toFixed(1);
+    const tgt=TARGETS[v];
+    const excesoOp=Math.max(0,+(avgT-tgt).toFixed(1));
+    const minPerdidos=excesoOp*data.length;
+    const personasProm=(()=>{ const ps=D.filter(r=>r.veh===v&&r.p!=null).map(r=>r.p); return ps.length?av(ps):1; })();
+    const horasHombre=+((minPerdidos*personasProm)/60).toFixed(1);
+    return {v,cnt:data.length,avgT,tgt,excesoOp,horasHombre,personasProm:+personasProm.toFixed(1)};
+  }).filter(Boolean).sort((a,b)=>b.horasHombre-a.horasHombre);
+
+  const totalHH=+filasImpacto.reduce((s,f)=>s+f.horasHombre,0).toFixed(1);
+  const top3=filasImpacto.slice(0,3);
+
+  document.getElementById('impacto_grid').innerHTML=`
+    <div class="kc">
+      <p class="kl">Horas-hombre perdidas / semana</p>
+      <p class="kv" style="color:#E74C3C;">${totalHH}</p>
+      <p class="ks">en el período registrado, sobre la meta</p>
+    </div>
+    <div class="kc">
+      <p class="kl">Operación de mayor impacto</p>
+      <p class="kv" style="font-size:16px;color:#702082;">${top3[0]?top3[0].v:'—'}</p>
+      <p class="ks">${top3[0]?top3[0].horasHombre+' h-h perdidas':'sin datos'}</p>
+    </div>
+    <div class="kc">
+      <p class="kl">Equivalente aproximado</p>
+      <p class="kv" style="font-size:16px;color:#1d1d1f;">${(totalHH/8).toFixed(1)} jornadas</p>
+      <p class="ks">de 8 horas de una persona, por semana</p>
+    </div>`;
+
+  document.getElementById('impacto_tb').innerHTML=filasImpacto.map(f=>`
+    <tr>
+      <td style="font-weight:500;font-size:12px;">${f.v}</td>
+      <td style="font-size:11px;">${f.cnt}</td>
+      <td style="font-size:11px;">${f.avgT} min</td>
+      <td style="font-size:11px;">${f.tgt} min</td>
+      <td style="font-size:11px;color:${f.excesoOp>0?'#E74C3C':'#27AE60'};font-weight:500;">${f.excesoOp>0?'+'+f.excesoOp+' min':'0 min'}</td>
+      <td style="font-weight:600;color:${f.horasHombre>0?'#E74C3C':'#27AE60'};">${f.horasHombre>0?f.horasHombre+' h-h':'Sin pérdida'}</td>
+    </tr>`).join('');
+
+  const insEl=document.getElementById('impacto_insight');
+  if(totalHH>0){
+    insEl.innerHTML=`<strong>Lectura para Gerencia:</strong> el CD está perdiendo aproximadamente <strong>${totalHH} horas-hombre por semana</strong> por encima de las metas establecidas — equivalente a <strong>${(totalHH/8).toFixed(1)} jornadas completas</strong> de una persona. Concentrar el esfuerzo de mejora en <strong>${top3.map(f=>f.v).join(', ')}</strong> capturaría la mayor parte de ese ahorro potencial.`;
+  } else {
+    insEl.innerHTML=`<strong>Lectura para Gerencia:</strong> no se detecta pérdida neta de horas-hombre sobre la meta en el período actual — las operaciones están, en promedio, dentro de los tiempos objetivo.`;
+  }
+
+  // ── Evolución mensual ──
+  const meses=[...new Set(D.map(r=>r.mes))];
+  const ordenMeses=['Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre'];
+  const mesesOrd=ordenMeses.filter(m=>meses.includes(m));
+  const avgMesCarga=mesesOrd.map(m=>{const t=D.filter(r=>r.mes===m&&r.tipo==='Carga').map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const avgMesDesc=mesesOrd.map(m=>{const t=D.filter(r=>r.mes===m&&r.tipo==='Descarga').map(r=>r.t);return t.length?+av(t).toFixed(1):null;});
+  const cumpMes=mesesOrd.map(m=>{const t=D.filter(r=>r.mes===m);const on=t.filter(r=>r.t<=TARGETS[r.veh]);return t.length?Math.round(on.length/t.length*100):null;});
+
+  document.getElementById('leg_evol_mes').innerHTML=`
+    <span><span class="lsq" style="background:#702082;"></span>Promedio Carga</span>
+    <span><span class="lsq" style="background:#EB008B;"></span>Promedio Descarga</span>
+    <span><span class="ldot" style="background:#27AE60;"></span>% Cumplimiento de meta</span>`;
+
+  CI['evol_mes']=new Chart(document.getElementById('c_evol_mes'),{
+    data:{labels:mesesOrd,datasets:[
+      {type:'bar',label:'Promedio Carga',data:avgMesCarga,backgroundColor:'rgba(112,32,130,0.75)',borderRadius:5,yAxisID:'y',order:2},
+      {type:'bar',label:'Promedio Descarga',data:avgMesDesc,backgroundColor:'rgba(235,0,139,0.75)',borderRadius:5,yAxisID:'y',order:2},
+      {type:'line',label:'% Cumplimiento de meta',data:cumpMes,borderColor:'#27AE60',backgroundColor:'#27AE60',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#27AE60',pointBorderColor:'white',pointBorderWidth:1.5,yAxisID:'y1',tension:0.25,order:1}
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{label:ctx=>ctx.dataset.label.includes('Cumplimiento')?` ${ctx.dataset.label}: ${ctx.raw}%`:` ${ctx.dataset.label}: ${ctx.raw??'—'} min`}}
+      },
+      scales:{
+        y:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},
+        y1:{type:'linear',position:'right',min:0,max:100,title:{display:true,text:'% cumplimiento',font:{size:10}},ticks:{font:{size:10},callback:v=>v+'%'},grid:{display:false}},
+        x:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+
+  const evolInsEl=document.getElementById('evol_mes_insight');
+  if(mesesOrd.length>=2){
+    const primerMes=mesesOrd[0], ultimoMes=mesesOrd[mesesOrd.length-1];
+    const cPrim=cumpMes[0], cUlt=cumpMes[cumpMes.length-1];
+    if(cPrim!=null&&cUlt!=null){
+      const delta=cUlt-cPrim;
+      evolInsEl.innerHTML=delta>=0
+        ?`<strong>Tendencia positiva:</strong> el cumplimiento de meta pasó de <strong>${cPrim}%</strong> en ${primerMes} a <strong>${cUlt}%</strong> en ${ultimoMes} (+${delta} puntos). El programa de control de tiempos está generando resultado medible.`
+        :`<strong>Tendencia a vigilar:</strong> el cumplimiento de meta bajó de <strong>${cPrim}%</strong> en ${primerMes} a <strong>${cUlt}%</strong> en ${ultimoMes} (${delta} puntos). Conviene revisar qué cambió operativamente entre ambos meses.`;
+    } else {
+      evolInsEl.innerHTML=`<strong>Datos insuficientes</strong> para comparar cumplimiento entre ${primerMes} y ${ultimoMes}.`;
+    }
+  } else {
+    evolInsEl.innerHTML=`<strong>Se necesita al menos 2 meses con datos</strong> para mostrar evolución mensual. Continuar registrando tiempos para habilitar este análisis.`;
+  }
 }
 
 // ── Helpers para mejoras dinámicas ──
@@ -1380,36 +1536,66 @@ function renderMejoras(){
   const ord={alta:0,media:1,baja:2};
   items.sort((a,b)=>ord[a.p]-ord[b.p]);
 
+  // ── Responsable sugerido según el tipo de hallazgo ──
+  function responsableSugerido(m){
+    const tag=(m.tag||'').toLowerCase();
+    if(tag.includes('dotación')||tag.includes('flujo continuo')) return 'Jefe de Turno / Supply Chain';
+    if(tag.includes('5 porqués')||tag.includes('medición')) return 'Supervisor de CD';
+    if(tag.includes('sop')) return 'Supply Chain + Calidad';
+    if(tag.includes('control estadístico')||tag.includes('kaizen')) return 'Gerencia de Logística';
+    if(m.tipoOp==='Carga') return 'Coordinador de Despacho';
+    if(m.tipoOp==='Descarga') return 'Coordinador de Recepción';
+    return 'Supply Chain';
+  }
+
+  // ── Versión corta y simple del problema/acción/impacto (sin jerga técnica) ──
+  function resumenSimple(m){
+    // Problema: usa el title, que ya es corto, quitando símbolos decorativos
+    const problema=m.title.replace(/^[✅⚠️🔴]\s*/,'').trim();
+    // Impacto: primera frase relevante de m.imp, sin HTML
+    let impacto=m.imp.replace(/<[^>]+>/g,'').split('.')[0].trim();
+    if(impacto.length>110) impacto=impacto.slice(0,107)+'...';
+    // Acción: primera frase de m.ac, sin HTML, máximo ~120 caracteres
+    let accion=m.ac.replace(/<[^>]+>/g,'').split('.')[0].trim()+'.';
+    if(accion.length>120) accion=accion.slice(0,117)+'...';
+    return {problema,impacto,accion};
+  }
+
   // ── Render ──
-  const pl={alta:'Prioridad alta',media:'Prioridad media',baja:'Prioridad baja'};
+  const pl={alta:'Alta',media:'Media',baja:'Baja'};
+  const plColor={alta:'#C0392B',media:'#E67E22',baja:'#27AE60'};
+  const plBg={alta:'rgba(192,57,43,0.08)',media:'rgba(230,126,34,0.08)',baja:'rgba(39,174,96,0.08)'};
   const meses=[...new Set(D.map(r=>r.mes))];
   document.getElementById('ca').textContent=items.filter(m=>m.p==='alta').length;
   document.getElementById('cm').textContent=items.filter(m=>m.p==='media').length;
   document.getElementById('cb').textContent=items.filter(m=>m.p==='baja').length;
 
+  const filasHTML=items.map((m,i)=>{
+    const {problema,impacto,accion}=resumenSimple(m);
+    const resp=responsableSugerido(m);
+    return `
+    <tr>
+      <td style="text-align:center;font-size:11px;color:var(--color-text-tertiary);">${i+1}</td>
+      <td><span class="badge" style="background:${plBg[m.p]};color:${plColor[m.p]};font-weight:600;">${pl[m.p]}</span></td>
+      <td style="font-size:12px;font-weight:500;max-width:230px;">${problema}</td>
+      <td style="font-size:12px;color:#E74C3C;max-width:200px;">${impacto}.</td>
+      <td style="font-size:12px;color:var(--color-text-secondary);max-width:260px;">${accion}</td>
+      <td style="font-size:11px;color:#702082;font-weight:500;white-space:nowrap;">${resp}</td>
+    </tr>`;
+  }).join('');
+
   document.getElementById('ml').innerHTML=`
     <div class="insight" style="margin-bottom:12px;line-height:1.6;">
-      <strong>🤖 Análisis generado automáticamente</strong> desde <strong>${D.length} registros operacionales</strong> 
-      (${meses.join(', ')}) · Se actualiza en tiempo real al agregar nuevos datos en la pestaña Registro · 
-      Metodología: análisis de desviación vs meta, variabilidad CV, impacto de dotación, incidencias y tendencia semanal.
+      Análisis generado automáticamente a partir de <strong>${D.length} registros</strong> (${meses.join(', ')}).
+      Se actualiza solo al agregar nuevos datos en la pestaña Registro.
     </div>
-  `+items.map((m,i)=>`
-    <div class="mc">
-      <div class="mi" style="background:${PB[m.p]};color:${PC[m.p]};">${i+1}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;">
-          <p style="font-weight:500;font-size:13px;color:var(--color-text-primary);">${m.title}</p>
-          <span class="badge" style="background:${PB[m.p]};color:${PC[m.p]};">${pl[m.p]}</span>
-          <span class="badge" style="background:${TB[m.tipoOp]||TB.General};color:${TC[m.tipoOp]||TC.General};">${m.tipoOp}</span>
-          <span class="badge" style="background:rgba(112,32,130,0.08);color:#702082;">${m.tag}</span>
-        </div>
-        <div class="sep"></div>
-        <p style="font-size:12px;color:${PC[m.p]};margin-bottom:5px;"><span style="font-weight:500;">📊 Evidencia de datos:</span> ${m.pb}</p>
-        <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;"><span style="font-weight:500;">⚡ Acción recomendada:</span> ${m.ac}</p>
-        <p style="font-size:12px;color:#27AE60;"><span style="font-weight:500;">🎯 Impacto esperado:</span> ${m.imp}</p>
-      </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>#</th><th>Prioridad</th><th>Problema</th><th>Impacto</th><th>Acción recomendada</th><th>Responsable</th></tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table>
     </div>
-  `).join('');
+  `;
 }
 
 function ttf(){
@@ -1679,38 +1865,31 @@ function initFirebase(){
 
     showLoader(true);
 
-    // Listener principal — Firebase siempre tiene prioridad sobre datos locales
+    // Listener principal para registros D
     dbRef.on('value', snapshot=>{
       const maxId=syncFromSnapshot(snapshot, D);
       if(D.length===0){
-        SEED_D.forEach(r=>D.push({...r}));
-        console.warn('Firebase vacio — usando datos locales de respaldo');
+        // Primera vez: sembrar datos históricos
+        seedFirebase(dbRef, SEED_D, 'reg').then(()=>console.log('Datos sembrados en Firebase'));
       } else {
         if(maxId>=nid) nid=maxId+1;
-        console.log('Firebase cargo '+D.length+' registros correctamente');
+        showLoader(false); uts(); ra();
       }
-      showLoader(false); uts(); ra();
     }, err=>{
       console.error('Firebase error:', err);
-      if(D.length===0) SEED_D.forEach(r=>D.push({...r}));
+      D=SEED_D.map(r=>({...r}));
       showLoader(false); uts(); ra();
     });
 
-    // Listener trasiego DT
+    // Listener para trasiego DT
     dbTrasiegoRef.on('value', snapshot=>{
       const maxId=syncFromSnapshot(snapshot, DT);
       if(DT.length===0){
-        SEED_DT.forEach(r=>DT.push({...r}));
-        console.warn('Firebase trasiego vacio — usando datos locales');
+        seedFirebase(dbTrasiegoRef, SEED_DT, 'tras');
       } else {
         if(maxId>=ntid) ntid=maxId+1;
-        console.log('Firebase trasiego cargo '+DT.length+' registros');
+        renderTrasiego(); uts();
       }
-      renderTrasiego(); uts();
-    }, err=>{
-      console.error('Firebase trasiego error:', err);
-      if(DT.length===0) SEED_DT.forEach(r=>DT.push({...r}));
-      renderTrasiego(); uts();
     });
 
   } catch(e){
@@ -1720,9 +1899,169 @@ function initFirebase(){
   }
 }
 
+// ══════════════════════════════════════════════════════════
+//  📄 GENERACIÓN DE REPORTES — PDF EJECUTIVO Y EXCEL
+// ══════════════════════════════════════════════════════════
+function repFiltrar(){
+  const mes=document.getElementById('rep_mes').value;
+  const tipo=document.getElementById('rep_tipo').value;
+  let f=D;
+  if(mes) f=f.filter(r=>r.mes===mes);
+  if(tipo) f=f.filter(r=>r.tipo===tipo);
+  return f;
+}
+function repStatus(msg,ok){
+  const el=document.getElementById('rep_status');
+  el.style.display='block';
+  el.style.background=ok?'rgba(39,174,96,0.1)':'rgba(231,76,60,0.1)';
+  el.style.color=ok?'#1e7e45':'#c0392b';
+  el.textContent=msg;
+}
+function fechaHoy(){
+  return new Date().toLocaleDateString('es-GT',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+function generarPDF(){
+  try{
+    const datos=repFiltrar();
+    if(!datos.length){repStatus('No hay registros para el filtro seleccionado.',false);return;}
+    const mesF=document.getElementById('rep_mes').value||'Todo el histórico';
+    const tipoF=document.getElementById('rep_tipo').value||'Carga y Descarga';
+
+    const { jsPDF }=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'letter'});
+    const pageW=doc.internal.pageSize.getWidth();
+    const morado=[112,32,130], rosa=[235,0,139], gris=[110,110,115], negro=[29,29,31];
+
+    // ── Encabezado ──
+    doc.setFillColor(...morado);
+    doc.rect(0,0,pageW,22,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(13);
+    doc.setFont(undefined,'bold');
+    doc.text('Centro de Distribución — Taco Bell Guatemala',12,9);
+    doc.setFontSize(9);
+    doc.setFont(undefined,'normal');
+    doc.text('Reporte Ejecutivo de Control de Tiempos Operativos — Supply Chain',12,15);
+    doc.setFontSize(8);
+    doc.text(`Período: ${mesF}  ·  Operación: ${tipoF}  ·  Generado: ${fechaHoy()}`,12,19.5);
+
+    let y=30;
+    doc.setTextColor(...negro);
+
+    // ── KPIs resumen ──
+    const ct=datos.filter(r=>r.tipo==='Carga').map(r=>r.t);
+    const dt=datos.filter(r=>r.tipo==='Descarga').map(r=>r.t);
+    const onTarget=datos.filter(r=>r.t<=TARGETS[r.veh]);
+    const pctOn=Math.round(onTarget.length/datos.length*100);
+    const critOps=datos.filter(r=>r.t>TARGETS[r.veh]*1.3);
+
+    doc.setFontSize(11); doc.setFont(undefined,'bold');
+    doc.text('Indicadores del período',12,y); y+=2;
+    doc.setDrawColor(...morado); doc.setLineWidth(0.4); doc.line(12,y,pageW-12,y); y+=6;
+
+    const kpiBoxes=[
+      {l:'Promedio Carga',v:(av(ct)||0).toFixed(1)+' min',c:morado},
+      {l:'Promedio Descarga',v:(av(dt)||0).toFixed(1)+' min',c:rosa},
+      {l:'Cumplimiento de meta',v:pctOn+'%',c:pctOn>=80?[39,174,96]:[231,76,60]},
+      {l:'Operaciones críticas',v:String(critOps.length),c:[231,76,60]},
+      {l:'Total registros',v:String(datos.length),c:gris}
+    ];
+    const boxW=(pageW-24-4*4)/5;
+    kpiBoxes.forEach((k,i)=>{
+      const x=12+i*(boxW+4);
+      doc.setFillColor(245,245,247);
+      doc.roundedRect(x,y,boxW,18,1.5,1.5,'F');
+      doc.setTextColor(...k.c); doc.setFontSize(13); doc.setFont(undefined,'bold');
+      doc.text(k.v,x+boxW/2,y+8,{align:'center'});
+      doc.setTextColor(...gris); doc.setFontSize(6.8); doc.setFont(undefined,'normal');
+      doc.text(k.l,x+boxW/2,y+13.5,{align:'center',maxWidth:boxW-2});
+    });
+    y+=26;
+
+    // ── Tabla ranking por operación ──
+    doc.setTextColor(...negro); doc.setFontSize(11); doc.setFont(undefined,'bold');
+    doc.text('Cumplimiento por tipo de operación',12,y); y+=2;
+    doc.setDrawColor(...morado); doc.line(12,y,pageW-12,y); y+=4;
+
+    const rankRows=ALL_VEHS.map(v=>{
+      const vd2=datos.filter(r=>r.veh===v).map(r=>r.t);
+      if(!vd2.length) return null;
+      const avgT=+av(vd2).toFixed(1);
+      const tgt=TARGETS[v];
+      const estado=avgT<=tgt?'En meta':avgT<=tgt*1.3?'Atención':'Crítico';
+      return [v, vd2.length, avgT.toFixed(1)+' min', tgt+' min', (avgT<=tgt?'-':'+') + Math.abs(((avgT-tgt)/tgt*100)).toFixed(0)+'%', estado];
+    }).filter(Boolean);
+
+    doc.autoTable({
+      startY:y, margin:{left:12,right:12},
+      head:[['Operación','Reg.','Promedio','Meta','Desv.','Estado']],
+      body:rankRows,
+      theme:'plain',
+      styles:{fontSize:8.3,cellPadding:2.2},
+      headStyles:{fillColor:morado,textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[245,245,247]},
+      didParseCell:(d)=>{
+        if(d.section==='body'&&d.column.index===5){
+          const v=d.cell.raw;
+          if(v==='Crítico') d.cell.styles.textColor=[231,76,60];
+          else if(v==='Atención') d.cell.styles.textColor=[230,126,34];
+          else d.cell.styles.textColor=[39,174,96];
+          d.cell.styles.fontStyle='bold';
+        }
+      }
+    });
+    y=doc.lastAutoTable.finalY+8;
+
+    // ── Hallazgos críticos (Top 3 desde el motor de mejoras) ──
+    if(y>225){ doc.addPage(); y=15; }
+    doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(...negro);
+    doc.text('Hallazgos prioritarios y plan de acción',12,y); y+=2;
+    doc.setDrawColor(...morado); doc.line(12,y,pageW-12,y); y+=5;
+
+    const hallazgos=rankRows.filter(r=>r[5]!=='En meta').sort((a,b)=>parseFloat(b[4])-parseFloat(a[4])).slice(0,3);
+    if(!hallazgos.length){
+      doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(...gris);
+      doc.text('Todas las operaciones del período se encuentran dentro de la meta establecida.',12,y);
+      y+=7;
+    } else {
+      hallazgos.forEach((h,i)=>{
+        doc.setFontSize(9.3); doc.setFont(undefined,'bold'); doc.setTextColor(...negro);
+        doc.text(`${i+1}. ${h[0]} — ${h[5]} (${h[2]} vs meta ${h[3]}, ${h[4]} de desviación)`,12,y);
+        y+=4.6;
+        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(...gris);
+        const accion=h[5]==='Crítico'
+          ?'Acción: revisar SOP y dotación de personal de inmediato; analizar causas raíz con 5 Porqués.'
+          :'Acción: ajuste menor de condiciones operativas; estandarizar registros que ya cumplen meta.';
+        doc.text(accion,14,y,{maxWidth:pageW-28});
+        y+=6.5;
+      });
+    }
+
+    // ── Pie de página / autoría ──
+    const pageH=doc.internal.pageSize.getHeight();
+    doc.setDrawColor(220,220,225); doc.setLineWidth(0.3);
+    doc.line(12,pageH-16,pageW-12,pageH-16);
+    doc.setFontSize(7.5); doc.setTextColor(...gris); doc.setFont(undefined,'normal');
+    doc.text('Elaborado por: Mario Alexander Cachupe Santos — Ingeniero de Operaciones, Supply Chain',12,pageH-11);
+    doc.text('Centro de Distribución Taco Bell Guatemala — Sistema de Control de Tiempos Operativos',12,pageH-7.5);
+    doc.text(`Generado el ${fechaHoy()}`,pageW-12,pageH-7.5,{align:'right'});
+
+    const fname=`Reporte_CD_TacoBell_${mesF.replace(/\s/g,'')}_${Date.now()}.pdf`;
+    doc.save(fname);
+    repStatus('✔ PDF generado y descargado correctamente: '+fname,true);
+  } catch(e){
+    console.error(e);
+    repStatus('✘ Error al generar el PDF: '+e.message,false);
+  }
+}
+
 uts();
 initFirebase();
 
 </script>
 </body>
 </html>
+    
+
+  
