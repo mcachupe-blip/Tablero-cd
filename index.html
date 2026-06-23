@@ -162,7 +162,7 @@
       <div style="background:rgba(255,199,44,0.15);border:1px solid rgba(255,199,44,0.5);border-radius:6px;padding:4px 10px;font-size:11px;color:#7a5c00;font-weight:500;">⚡ Metas revisadas por Claude Supply Chain</div>
     </div>
     <div id="meta_grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;"></div>
-    <div style="margin-top:10px;padding:8px 12px;background:rgba(112,32,130,0.04);border-radius:8px;font-size:11px;color:var(--color-text-secondary);line-height:1.6;" id="meta_nota"></div>
+    <div style="margin-top:12px;" id="meta_nota"></div>
   </div>
 
   <div class="cd">
@@ -245,15 +245,11 @@
   <p style="font-size:11px;color:var(--color-text-secondary);margin-bottom:10px;padding-left:2px;">Vehículos de carga: <strong>Camión 10-12t</strong> y <strong>Camión 5.4t</strong> — distribución a restaurantes desde el CD</p>
 
   <div class="cd">
-    <p class="ct">Variabilidad de CARGA — rango min / promedio / máx</p>
-    <p class="cs">Cuanto más corta la barra de rango, más controlada y predecible es la operación de carga</p>
-    <div class="leg">
-      <span><span class="lsq" style="background:rgba(112,32,130,0.2);"></span>Rango min–máx</span>
-      <span><span class="lsq" style="background:#702082;"></span>Promedio</span>
-      <span><span class="lsq" style="background:#FFC72C;"></span>Meta objetivo</span>
-    </div>
-    <div style="position:relative;height:210px;">
-      <canvas id="c_var_carga" role="img" aria-label="Variabilidad de operaciones de carga por tipo de camión">Variabilidad operaciones de carga.</canvas>
+    <p class="ct">Consistencia del proceso de CARGA — Coeficiente de Variación (CV%)</p>
+    <p class="cs">El CV% es el indicador estándar Six Sigma para medir qué tan predecible es un proceso: <strong>menos de 30% = proceso estable</strong> · <strong>30–60% = variabilidad moderada</strong> · <strong>más de 60% = proceso no estandarizado</strong></p>
+    <div id="cv_carga_cards" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;"></div>
+    <div style="position:relative;height:140px;">
+      <canvas id="c_var_carga" role="img" aria-label="Coeficiente de variación de operaciones de carga por tipo de camión">Variabilidad operaciones de carga.</canvas>
     </div>
   </div>
 
@@ -270,15 +266,11 @@
 
   <div class="g2">
     <div class="cd" style="margin-bottom:0;">
-      <p class="ct">Variabilidad de DESCARGA — rango min / promedio / máx</p>
-      <p class="cs">Furgones, granel y pallets · cuanto más corta la barra, más estable la recepción</p>
-      <div class="leg">
-        <span><span class="lsq" style="background:rgba(235,0,139,0.2);"></span>Rango min–máx</span>
-        <span><span class="lsq" style="background:#EB008B;"></span>Promedio</span>
-        <span><span class="lsq" style="background:#FFC72C;"></span>Meta</span>
-      </div>
-      <div style="position:relative;height:230px;">
-        <canvas id="c_var_desc" role="img" aria-label="Variabilidad de operaciones de descarga por tipo de vehículo">Variabilidad operaciones de descarga.</canvas>
+      <p class="ct">Consistencia del proceso de DESCARGA — Coeficiente de Variación (CV%)</p>
+      <p class="cs">Furgones, granel y pallets · CV% más bajo = recepción más estable y predecible</p>
+      <div id="cv_desc_cards" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px;"></div>
+      <div style="position:relative;height:160px;">
+        <canvas id="c_var_desc" role="img" aria-label="Coeficiente de variación de operaciones de descarga por tipo de vehículo">Variabilidad operaciones de descarga.</canvas>
       </div>
     </div>
     <div class="cd" style="margin-bottom:0;">
@@ -359,7 +351,7 @@
 <!-- REGISTRO -->
 <div id="preg" class="pnl">
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
-    <select id="fm" onchange="rt()" style="width:auto;"><option value="">Todos los meses</option><option>Marzo</option><option>Abril</option></select>
+    <select id="fm" onchange="rt()" style="width:auto;"><option value="">Todos los meses</option><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select>
     <select id="ft" onchange="rt()" style="width:auto;"><option value="">Carga y descarga</option><option>Carga</option><option>Descarga</option></select>
     <select id="fv" onchange="rt()" style="width:auto;"><option value="">Todos los vehículos</option><option>Camión 10-12t</option><option>Camión 5.4t</option><option>Furgón 22 tar.</option><option>Furgón 26 tar.</option><option>Camión granel</option><option>Camión pallets</option></select>
     <span style="margin-left:auto;font-size:11px;color:var(--color-text-tertiary);" id="rc"></span>
@@ -367,8 +359,11 @@
   </div>
   <div id="af" style="display:none;background:rgba(112,32,130,0.05);border:1px solid rgba(112,32,130,0.2);border-radius:10px;padding:14px;margin-bottom:12px;">
     <p style="font-weight:500;font-size:13px;margin-bottom:12px;color:#702082;">Agregar nuevo registro</p>
-    <div class="fg3">
-      <div class="fg"><label>Mes</label><select id="nm"><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option></select></div>
+    <div class="fg2">
+      <div class="fg"><label>Mes</label><select id="nm"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div>
+      <div class="fg"><label>Año</label><select id="nanio"><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option></select></div>
+    </div>
+    <div class="fg2">
       <div class="fg"><label>Semana</label><input type="text" id="ns" placeholder="Ej: S-07"></div>
       <div class="fg"><label>Tipo de operación</label><select id="nt" onchange="uv()"><option>Carga</option><option>Descarga</option></select></div>
     </div>
@@ -440,17 +435,18 @@
   <div id="trec_af" style="display:none;background:rgba(112,32,130,0.05);border:1px solid rgba(112,32,130,0.2);border-radius:10px;padding:14px;margin-bottom:12px;">
     <p style="font-weight:500;font-size:13px;margin-bottom:12px;color:#702082;">Agregar nuevo registro de trasiego</p>
     <div class="fg3">
-      <div class="fg"><label>Mes</label><select id="tnm"><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option></select></div>
+      <div class="fg"><label>Mes</label><select id="tnm"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></div>
+      <div class="fg"><label>Año</label><select id="tnanio"><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option></select></div>
       <div class="fg"><label>T. Congelado (min)</label><input type="number" id="tnc" placeholder="Ej: 33.57" step="0.01" min="0"></div>
-      <div class="fg"><label>T. Refrigerado (min)</label><input type="number" id="tnr" placeholder="Ej: 7.00" step="0.01" min="0"></div>
     </div>
     <div class="fg3">
+      <div class="fg"><label>T. Refrigerado (min)</label><input type="number" id="tnr" placeholder="Ej: 7.00" step="0.01" min="0"></div>
       <div class="fg"><label>Personas en operación</label><input type="number" id="tnp" placeholder="Ej: 5" min="1"></div>
       <div class="fg"><label>Cajas cargadas</label><input type="number" id="tnb" placeholder="Ej: 260" min="1"></div>
-      <div class="fg"><label>Tipo de camión</label><select id="tntv"><option>Camión 5.4 ton</option><option>Panel</option><option>Camión 10-12t</option></select></div>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:10px;">
-      <div class="fg" style="flex:1;"><label>Observaciones</label><input type="text" id="tno" placeholder="Incidencias, condiciones..."></div>
+    <div class="fg2">
+      <div class="fg"><label>Tipo de camión</label><select id="tntv"><option>Camión 5.4 ton</option><option>Panel</option><option>Camión 10-12t</option></select></div>
+      <div class="fg"><label>Observaciones</label><input type="text" id="tno" placeholder="Incidencias, condiciones..."></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;">
       <button onclick="ttf()" style="font-size:12px;padding:6px 14px;border:1px solid var(--color-border-tertiary);border-radius:6px;background:var(--color-background-secondary);color:var(--color-text-secondary);">Cancelar</button>
@@ -500,7 +496,7 @@
     <p class="cs">Aplica a ambos formatos de exportación. Deja en blanco para incluir todo el histórico.</p>
     <div class="fg2">
       <div class="fg"><label>Mes (opcional)</label>
-        <select id="rep_mes"><option value="">Todos los meses</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option></select>
+        <select id="rep_mes"><option value="">Todos los meses</option><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select>
       </div>
       <div class="fg"><label>Tipo de operación (opcional)</label>
         <select id="rep_tipo"><option value="">Carga y descarga</option><option>Carga</option><option>Descarga</option></select>
@@ -518,7 +514,7 @@
   </div>
 
   <div class="insight" style="margin-top:4px;">
-    <strong>Autoría y control:</strong> Este reporte es generado y administrado por <strong>Mario Alexander Cachupe Santos</strong>, Ingeniero de Operaciones — Supply Chain, como parte del sistema de control de tiempos operativos del CD Taco Bell Guatemala. Los datos provienen de toma de tiempos en sitio, registrados y validados directamente en este tablero.
+    <strong>Autoría y control:</strong> Este reporte es generado y administrado por el <strong>Analista de Procesos</strong> de Supply Chain, como parte del sistema de control de tiempos operativos del CD Taco Bell Guatemala. Los datos provienen de toma de tiempos en sitio, registrados y validados directamente en este tablero.
   </div>
 
   <div id="rep_status" style="display:none;margin-top:8px;padding:10px 13px;border-radius:8px;font-size:12px;"></div>
@@ -595,12 +591,14 @@ let D=[
   {id:33,mes:'Abril',sem:'S-09',tipo:'Descarga',veh:'Furgón 26 tar.',t:19.29,p:3,prov:'Local',obs:'Ingrup 26 tar. — 2 auxiliares + montacarguista, descarga muy eficiente y rápida'},
 ];
 let nid=34;
+D.forEach(r=>{ if(!r.anio) r.anio='2026'; });
 
 // ── Datos de Trasiego (Toma de Tiempos Trasiego) ──
 const DT=[
   {id:1,mes:'Abril',congelado:33.57,refrigerado:7,personas:5,cajas:260,camion:'Camión 5.4 ton',obs:''},
 ];
 let ntid=2;
+DT.forEach(r=>{ if(!r.anio) r.anio='2026'; });
 
 // ══════════════════════════════════════════════════════════════════
 //  🔥 CONFIGURACIÓN FIREBASE — COMPLETAR DESPUÉS DE CREAR PROYECTO
@@ -664,6 +662,7 @@ function ar(){
   const record={
     id:nid++,
     mes:document.getElementById('nm').value,
+    anio:document.getElementById('nanio').value,
     sem:document.getElementById('ns').value||'S-??',
     tipo:document.getElementById('nt').value,
     veh:document.getElementById('nv').value,
@@ -788,17 +787,31 @@ function renderDashCharts(){
         const icon=p.a<=p.tgt?'✔':p.a<=p.tgt*1.3?'▲':'✗';
         const iconColor=p.a<=p.tgt?'#27AE60':p.a<=p.tgt*1.3?'#E67E22':'#E74C3C';
         const gapAbs=(p.a-p.tgt).toFixed(1);
-        const gapStr=p.a<=p.tgt?`−${Math.abs(gapAbs)} min`:`+${gapAbs} min`;
+        const gapStr=p.a<=p.tgt?`−${Math.abs(gapAbs)} min vs meta`:`+${gapAbs} min vs meta`;
         ctx.save();
+        // Valor principal
         ctx.font='bold 12px -apple-system,BlinkMacSystemFont,sans-serif';
         ctx.fillStyle='#1d1d1f'; ctx.textAlign='left'; ctx.textBaseline='middle';
-        ctx.fillText(`${p.a} min`, bar.x+7, bar.y);
+        const valorTxt=`${p.a} min`;
+        ctx.fillText(valorTxt, bar.x+8, bar.y);
+        const valorWidth=ctx.measureText(valorTxt).width;
+
+        // Gap: medir si entra al lado, si no, debajo en una segunda línea
         ctx.font='10px -apple-system,BlinkMacSystemFont,sans-serif';
+        const gapWidth=ctx.measureText(`(${gapStr})`).width;
+        const chartRight=x.right;
+        const espacioDisponible=chartRight-(bar.x+8+valorWidth+10);
         ctx.fillStyle=iconColor;
-        const vw=ctx.measureText(`${p.a} min`).width;
-        ctx.fillText(`(${gapStr} vs meta)`, bar.x+7+vw+4, bar.y);
+        if(espacioDisponible>=gapWidth){
+          ctx.textBaseline='middle';
+          ctx.fillText(`(${gapStr})`, bar.x+8+valorWidth+10, bar.y);
+        } else {
+          ctx.textBaseline='middle';
+          ctx.fillText(`(${gapStr})`, bar.x+8, bar.y+13);
+        }
+        // Ícono de estado a la izquierda de la barra
         ctx.font='bold 12px -apple-system,sans-serif';
-        ctx.fillStyle=iconColor; ctx.textAlign='right';
+        ctx.fillStyle=iconColor; ctx.textAlign='right'; ctx.textBaseline='middle';
         ctx.fillText(icon, bar.x-5, bar.y);
         ctx.restore();
       });
@@ -831,7 +844,7 @@ function renderDashCharts(){
     plugins:[rankLabelPlugin],
     options:{
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      layout:{padding:{right:180,top:4,bottom:4}},
+      layout:{padding:{right:180,top:4,bottom:8}},
       plugins:{
         legend:{display:false},
         tooltip:{backgroundColor:'rgba(29,29,31,0.92)',padding:10,callbacks:{
@@ -851,19 +864,55 @@ function renderDashCharts(){
     }
   });
 
-  // ── Notas automáticas ──
+  // ── Resumen ejecutivo: KPIs + tabla de operaciones fuera de meta ──
   const notaEl=document.getElementById('meta_nota');
   const enMeta=pairs.filter(p=>p.a<=p.tgt);
   const atencion=pairs.filter(p=>p.a>p.tgt&&p.a<=p.tgt*1.3);
   const critico=pairs.filter(p=>p.a>p.tgt*1.3);
   const promGeneral=+av(D.map(r=>r.t)).toFixed(1);
-  let notas=[];
-  notas.push(`📊 <strong>Resumen:</strong> ${enMeta.length} de ${pairs.length} operaciones dentro de meta. ${critico.length>0?`<span style="color:#E74C3C;font-weight:600;">${critico.length} operación${critico.length>1?'es':''} crítica${critico.length>1?'s':''}.</span>`:'<span style="color:#27AE60;">Sin operaciones críticas.</span>'}`);
-  notas.push(`✅ <strong>Mejor operación:</strong> ${pairs[0].v} — ${pairs[0].a} min promedio, ${pairs[0].a<=pairs[0].tgt?`<span style="color:#27AE60;">${(pairs[0].tgt-pairs[0].a).toFixed(1)} min por debajo de su meta (${pairs[0].tgt} min)</span>`:'en atención'}.`);
-  critico.forEach(p=>{const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);notas.push(`🔴 <strong>${p.v}:</strong> ${p.a} min vs meta ${p.tgt} min (<span style="color:#E74C3C;font-weight:600;">+${pct}%</span>). ${p.cnt} registros — revisar SOP y dotación.`);});
-  atencion.forEach(p=>{const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);notas.push(`⚠ <strong>${p.v}:</strong> ${p.a} min vs meta ${p.tgt} min (+${pct}%). Ajuste menor puede ponerla en meta.`);});
-  notas.push(`📈 <strong>Promedio general:</strong> ${promGeneral} min · <strong>${D.length}</strong> registros totales.`);
-  notaEl.innerHTML=notas.map(n=>`<div style="padding:4px 0;border-bottom:0.5px solid rgba(112,32,130,0.08);line-height:1.5;">${n}</div>`).join('');
+  const fueraDeMeta=[...critico,...atencion];
+
+  const pctEnMeta=Math.round(enMeta.length/pairs.length*100);
+  const colorPct=pctEnMeta>=80?'#27AE60':pctEnMeta>=50?'#E67E22':'#C0392B';
+
+  const filasFuera=fueraDeMeta.map(p=>{
+    const pct=+((p.a-p.tgt)/p.tgt*100).toFixed(0);
+    const esCritico=p.a>p.tgt*1.3;
+    return `<tr>
+      <td style="font-size:12px;font-weight:500;">${p.v}</td>
+      <td style="font-size:12px;">${p.a} min</td>
+      <td style="font-size:12px;color:var(--color-text-tertiary);">${p.tgt} min</td>
+      <td style="font-size:12px;font-weight:600;color:${esCritico?'#C0392B':'#E67E22'};">+${pct}%</td>
+      <td><span class="badge" style="background:${esCritico?'rgba(192,57,43,0.08)':'rgba(230,126,34,0.08)'};color:${esCritico?'#C0392B':'#E67E22'};font-weight:600;">${esCritico?'Crítico':'Atención'}</span></td>
+    </tr>`;
+  }).join('');
+
+  notaEl.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;">
+      <div class="kc" style="margin:0;">
+        <p class="kl">Operaciones en meta</p>
+        <p class="kv" style="color:${colorPct};">${enMeta.length}/${pairs.length}</p>
+        <p class="ks">${pctEnMeta}% del total · ${critico.length>0?critico.length+' crítica'+(critico.length>1?'s':''):'sin críticas'}</p>
+      </div>
+      <div class="kc" style="margin:0;">
+        <p class="kl">Mejor operación</p>
+        <p class="kv" style="font-size:16px;color:#27AE60;">${pairs[0].v}</p>
+        <p class="ks">${pairs[0].a} min · ${pairs[0].a<=pairs[0].tgt?(pairs[0].tgt-pairs[0].a).toFixed(1)+' min bajo meta':'en atención'}</p>
+      </div>
+      <div class="kc" style="margin:0;">
+        <p class="kl">Promedio general CD</p>
+        <p class="kv">${promGeneral}</p>
+        <p class="ks">min · ${D.length} registros totales</p>
+      </div>
+    </div>
+    ${fueraDeMeta.length?`
+    <div class="tw">
+      <table>
+        <thead><tr><th>Operación fuera de meta</th><th>Real</th><th>Meta</th><th>Desv.</th><th>Estado</th></tr></thead>
+        <tbody>${filasFuera}</tbody>
+      </table>
+    </div>`:`<div class="insight" style="margin:0;">Todas las operaciones están dentro de su meta objetivo.</div>`}
+  `;
 
   // ── Tendencia semanal — CARGA (vehículos de distribución) ──
   const sems=[...new Set(D.map(r=>r.sem))].sort();
@@ -1058,86 +1107,86 @@ function renderCompCharts(){
     }
   });
 
-  // ── Variabilidad CARGA — Min / Promedio / Máximo ──
-  const vcMn=cargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
-  const vcAv=cargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
-  const vcMx=cargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
-  const vcTg=cargaVehs.map(v=>TARGETS[v]);
+  // ── Consistencia del proceso — Coeficiente de Variación (CV%) ──
+  // CV% = (desviación estándar / promedio) × 100 — estándar Six Sigma para medir predictibilidad de un proceso
+  function severidadCV(cv){
+    if(cv<30) return {label:'Estable',color:'#27AE60',bg:'rgba(39,174,96,0.08)'};
+    if(cv<60) return {label:'Variabilidad moderada',color:'#E67E22',bg:'rgba(230,126,34,0.08)'};
+    return {label:'No estandarizado',color:'#C0392B',bg:'rgba(192,57,43,0.08)'};
+  }
+  function tarjetaCV(v){
+    const data=getVehData(v);
+    if(!data.length) return '';
+    const avgT=+av(data).toFixed(1);
+    const sdv=stdDev(data);
+    const cv=avgT>0?+((sdv/avgT)*100).toFixed(0):0;
+    const sev=severidadCV(cv);
+    return `<div style="background:${sev.bg};border-radius:8px;padding:10px 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">
+        <p style="font-size:11.5px;font-weight:500;color:var(--color-text-primary);">${v}</p>
+        <span style="font-size:10px;font-weight:600;color:${sev.color};white-space:nowrap;">${sev.label}</span>
+      </div>
+      <p style="font-size:22px;font-weight:600;color:${sev.color};margin-top:4px;">${cv}%</p>
+      <p style="font-size:10px;color:var(--color-text-tertiary);">CV · promedio ${avgT} min · ±${sdv} min</p>
+    </div>`;
+  }
 
-  const varLabelPlugin={
-    id:'varLabel',
-    afterDatasetsDraw(chart){
-      const {ctx}=chart;
-      [0,1,2].forEach(di=>{
-        if(chart.data.datasets[di]?.type==='line')return;
-        const meta=chart.getDatasetMeta(di);
-        const labels=['min','avg','máx'];
-        const lc=['rgba(112,32,130,0.6)','#702082','rgba(112,32,130,0.55)'];
-        meta.data.forEach((bar,i)=>{
-          const v=chart.data.datasets[di].data[i];
-          if(!v)return;
-          ctx.save();
-          ctx.font=`${di===1?'bold ':' '}10px -apple-system,sans-serif`;
-          ctx.fillStyle=di===1?'white':'#333';
-          ctx.textAlign='center'; ctx.textBaseline='middle';
-          if(bar.height>14) ctx.fillText(v,bar.x,bar.y+bar.height/2);
-          ctx.restore();
-        });
-      });
-    }
-  };
+  document.getElementById('cv_carga_cards').innerHTML=cargaVehs.map(tarjetaCV).join('');
+  document.getElementById('cv_desc_cards').innerHTML=descargaVehs.map(tarjetaCV).join('');
 
+  function cvChartData(vehs){
+    return vehs.map(v=>{
+      const data=getVehData(v);
+      const avgT=data.length?av(data):0;
+      const sdv=data.length?stdDev(data):0;
+      return avgT>0?+((sdv/avgT)*100).toFixed(0):0;
+    });
+  }
+  function cvColors(cvs){
+    return cvs.map(cv=>severidadCV(cv).color);
+  }
+
+  const cvCargaVals=cvChartData(cargaVehs);
   CI['var_carga']=new Chart(document.getElementById('c_var_carga'),{
     type:'bar',
-    data:{labels:cargaVehs,datasets:[
-      {label:'Mínimo',data:vcMn,backgroundColor:'rgba(112,32,130,0.18)',borderColor:'rgba(112,32,130,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Promedio',data:vcAv,backgroundColor:'rgba(112,32,130,0.75)',borderColor:'#702082',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Máximo',data:vcMx.map((v,i)=>+(v-vcAv[i]).toFixed(1)),backgroundColor:'rgba(112,32,130,0.22)',borderColor:'rgba(112,32,130,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Meta',data:vcTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
-      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}}}
+    data:{labels:cargaVehs,datasets:[{label:'CV%',data:cvCargaVals,backgroundColor:cvColors(cvCargaVals),borderRadius:5,barThickness:28}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` CV: ${ctx.raw}% — ${severidadCV(ctx.raw).label}`}}},
+      scales:{x:{beginAtZero:true,max:Math.max(80,...cvCargaVals)+10,title:{display:true,text:'Coeficiente de Variación (%)',font:{size:10}},ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{font:{size:10}},grid:{display:false}}}
     }
   });
 
-  // ── Variabilidad DESCARGA ──
-  const vdMn=descargaVehs.map(v=>+mn(getVehData(v)).toFixed(1));
-  const vdAv=descargaVehs.map(v=>+av(getVehData(v)).toFixed(1));
-  const vdMx=descargaVehs.map(v=>+mx(getVehData(v)).toFixed(1));
-  const vdTg=descargaVehs.map(v=>TARGETS[v]);
-
+  const cvDescVals=cvChartData(descargaVehs);
   CI['var_desc']=new Chart(document.getElementById('c_var_desc'),{
     type:'bar',
-    data:{labels:descargaVehs,datasets:[
-      {label:'Mínimo',data:vdMn,backgroundColor:'rgba(235,0,139,0.15)',borderColor:'rgba(235,0,139,0.4)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Promedio',data:vdAv,backgroundColor:'rgba(235,0,139,0.75)',borderColor:'#EB008B',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Máximo',data:vdMx.map((v,i)=>+(v-vdAv[i]).toFixed(1)),backgroundColor:'rgba(235,0,139,0.2)',borderColor:'rgba(235,0,139,0.45)',borderWidth:1,borderRadius:3,stack:'s'},
-      {label:'Meta',data:vdTg,type:'line',borderColor:'#FFC72C',borderWidth:2.5,borderDash:[5,3],pointRadius:5,pointBackgroundColor:'#FFC72C',pointBorderColor:'white',pointBorderWidth:2,fill:false,tension:0}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:8}},
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{size:9},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw} min`}}},
-      scales:{y:{stacked:true,beginAtZero:true,title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{stacked:true,ticks:{font:{size:9},maxRotation:15},grid:{display:false}}}
+    data:{labels:descargaVehs,datasets:[{label:'CV%',data:cvDescVals,backgroundColor:cvColors(cvDescVals),borderRadius:5,barThickness:22}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` CV: ${ctx.raw}% — ${severidadCV(ctx.raw).label}`}}},
+      scales:{x:{beginAtZero:true,max:Math.max(80,...cvDescVals)+10,title:{display:true,text:'Coeficiente de Variación (%)',font:{size:10}},ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{font:{size:9}},grid:{display:false}}}
     }
   });
 
   // ── Scatter mejorado — sin jitter, con líneas de meta ──
-  const semToX={'S-01':1,'S-03':3,'S-04':4,'S-05':5,'S-06':6,'S-08':8,'S-09':9};
+  // Mapeo dinámico de semanas: extrae el número real de cada código "S-NN" presente en los datos,
+  // sin límite fijo — soporta cualquier cantidad de semanas (S-01 a S-52 y futuras)
+  const semsPresentes=[...new Set(D.map(r=>r.sem))].filter(s=>/^S-\d+$/.test(s)).sort((a,b)=>parseInt(a.slice(2))-parseInt(b.slice(2)));
+  const semToX={};
+  semsPresentes.forEach(s=>{ semToX[s]=parseInt(s.slice(2)); });
+  const semXMax=semsPresentes.length?Math.max(...Object.values(semToX)):10;
+  const semXMin=semsPresentes.length?Math.min(...Object.values(semToX)):0;
+
   const scatVehs=[...new Set(D.map(r=>r.veh))];
   document.getElementById('leg_scatter').innerHTML=scatVehs.map(v=>`<span><span class="ldot" style="background:${VEH_COLORS[v]||'#888'};"></span>${v}</span>`).join('');
 
   // Calcular promedios por semana para línea de tendencia global
-  const semXvals=Object.values(semToX);
-  const semAvgs=Object.keys(semToX).map(s=>{const t=D.filter(r=>r.sem===s).map(r=>r.t);return t.length?{x:semToX[s],y:+av(t).toFixed(1)}:null;}).filter(Boolean);
+  const semAvgs=semsPresentes.map(s=>{const t=D.filter(r=>r.sem===s).map(r=>r.t);return t.length?{x:semToX[s],y:+av(t).toFixed(1)}:null;}).filter(Boolean);
 
   CI['scat']=new Chart(document.getElementById('c_scat'),{
     type:'scatter',
     data:{datasets:[
       ...scatVehs.map(v=>({
         label:v,
-        data:D.filter(r=>r.veh===v).map(r=>({x:semToX[r.sem]||1,y:r.t,obs:r.obs||''})),
+        data:D.filter(r=>r.veh===v&&semToX[r.sem]!=null).map(r=>({x:semToX[r.sem],y:r.t,obs:r.obs||''})),
         backgroundColor:VEH_COLORS[v]||'#888',
         borderColor:(VEH_COLORS[v]||'#888'),
         pointRadius:6,pointHoverRadius:9,
@@ -1160,9 +1209,9 @@ function renderCompCharts(){
         }}
       },
       scales:{
-        x:{type:'linear',min:0,max:10,
+        x:{type:'linear',min:Math.max(0,semXMin-1),max:semXMax+1,
            title:{display:true,text:'Semana',font:{size:10}},
-           ticks:{font:{size:10},callback:v=>{const m={1:'S-01',3:'S-03',4:'S-04',5:'S-05',6:'S-06',8:'S-08',9:'S-09'};return m[v]||'';},stepSize:1},
+           ticks:{font:{size:10},callback:v=>{const found=Object.entries(semToX).find(([,num])=>num===v);return found?found[0]:'';},stepSize:1},
            grid:{color:'rgba(0,0,0,0.04)'}},
         y:{title:{display:true,text:'Minutos',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}
       }
@@ -1536,16 +1585,42 @@ function renderMejoras(){
   const ord={alta:0,media:1,baja:2};
   items.sort((a,b)=>ord[a.p]-ord[b.p]);
 
-  // ── Responsable sugerido según el tipo de hallazgo ──
-  function responsableSugerido(m){
+  // ── Dimensión Six Sigma que ataca cada acción (costo, variabilidad, calidad, cliente interno) ──
+  function dimensionSixSigma(m){
     const tag=(m.tag||'').toLowerCase();
-    if(tag.includes('dotación')||tag.includes('flujo continuo')) return 'Jefe de Turno / Supply Chain';
-    if(tag.includes('5 porqués')||tag.includes('medición')) return 'Supervisor de CD';
-    if(tag.includes('sop')) return 'Supply Chain + Calidad';
-    if(tag.includes('control estadístico')||tag.includes('kaizen')) return 'Gerencia de Logística';
-    if(m.tipoOp==='Carga') return 'Coordinador de Despacho';
-    if(m.tipoOp==='Descarga') return 'Coordinador de Recepción';
-    return 'Supply Chain';
+    if(tag.includes('variabilidad')||tag.includes('control estadístico')) return {d:'Variabilidad',c:'#1A6BAE',bg:'rgba(26,107,174,0.08)'};
+    if(tag.includes('5 porqués')) return {d:'Calidad',c:'#8E44AD',bg:'rgba(142,68,173,0.08)'};
+    if(tag.includes('flujo continuo')||tag.includes('dotación')) return {d:'Costo',c:'#C0392B',bg:'rgba(192,57,43,0.08)'};
+    if(tag.includes('sop')) return {d:'Cliente interno',c:'#16A085',bg:'rgba(22,160,133,0.08)'};
+    if(tag.includes('medición')) return {d:'Calidad',c:'#8E44AD',bg:'rgba(142,68,173,0.08)'};
+    if(m.p==='alta') return {d:'Costo',c:'#C0392B',bg:'rgba(192,57,43,0.08)'};
+    return {d:'Cliente interno',c:'#16A085',bg:'rgba(22,160,133,0.08)'};
+  }
+
+  // ── Acción recomendada reescrita en lenguaje Lean Six Sigma ──
+  // Enfoque: reducir costo, reducir variabilidad (CV%), mejorar calidad (defectos/incidencias),
+  // mejorar satisfacción del cliente interno (restaurantes/proveedores) → procesos consistentes y predecibles
+  function accionSixSigma(m){
+    const tag=(m.tag||'').toLowerCase();
+    if(tag.includes('variabilidad')||tag.includes('control estadístico')){
+      return `Reducir la variabilidad del proceso (CV%) mediante estandarización del método de trabajo — el objetivo Six Sigma no es solo bajar el promedio, sino lograr un proceso predecible dentro de límites de control definidos.`;
+    }
+    if(tag.includes('5 porqués')){
+      return `Aplicar 5 Porqués para atacar la causa raíz de los defectos de proceso (incidencias) — eliminarlas mejora calidad y reduce el costo oculto de reprocesos y tiempo perdido.`;
+    }
+    if(tag.includes('flujo continuo')||tag.includes('dotación')){
+      return `Estandarizar la dotación óptima como condición fija del proceso — reduce el costo por hora-hombre desperdiciada y la variabilidad que introduce operar con recursos inconsistentes.`;
+    }
+    if(tag.includes('sop')){
+      return `Documentar un SOP único e independiente del origen del proveedor — homogeneizar el método eleva la calidad del servicio y la satisfacción del cliente interno (restaurantes que reciben el producto a tiempo).`;
+    }
+    if(tag.includes('medición')){
+      return `Asegurar volumen de datos suficiente para habilitar análisis de capacidad de proceso (Cp/Cpk) — sin esto no es posible diagnosticar variabilidad real ni tomar decisiones con base estadística.`;
+    }
+    if(tag.includes('kaizen')){
+      return `Sostener la mejora lograda como nuevo estándar (Kaizen) — documentar la causa de la mejora evita retroceder y consolida el proceso como predecible.`;
+    }
+    return `Estandarizar el método de trabajo de esta operación para reducir su variabilidad y acercar el proceso a un desempeño consistente y predecible.`;
   }
 
   // ── Versión corta y simple del problema/acción/impacto (sin jerga técnica) ──
@@ -1555,9 +1630,8 @@ function renderMejoras(){
     // Impacto: primera frase relevante de m.imp, sin HTML
     let impacto=m.imp.replace(/<[^>]+>/g,'').split('.')[0].trim();
     if(impacto.length>110) impacto=impacto.slice(0,107)+'...';
-    // Acción: primera frase de m.ac, sin HTML, máximo ~120 caracteres
-    let accion=m.ac.replace(/<[^>]+>/g,'').split('.')[0].trim()+'.';
-    if(accion.length>120) accion=accion.slice(0,117)+'...';
+    // Acción: redactada en lenguaje Lean Six Sigma según el tipo de hallazgo
+    const accion=accionSixSigma(m);
     return {problema,impacto,accion};
   }
 
@@ -1572,26 +1646,27 @@ function renderMejoras(){
 
   const filasHTML=items.map((m,i)=>{
     const {problema,impacto,accion}=resumenSimple(m);
-    const resp=responsableSugerido(m);
+    const dim=dimensionSixSigma(m);
     return `
     <tr>
       <td style="text-align:center;font-size:11px;color:var(--color-text-tertiary);">${i+1}</td>
       <td><span class="badge" style="background:${plBg[m.p]};color:${plColor[m.p]};font-weight:600;">${pl[m.p]}</span></td>
-      <td style="font-size:12px;font-weight:500;max-width:230px;">${problema}</td>
-      <td style="font-size:12px;color:#E74C3C;max-width:200px;">${impacto}.</td>
-      <td style="font-size:12px;color:var(--color-text-secondary);max-width:260px;">${accion}</td>
-      <td style="font-size:11px;color:#702082;font-weight:500;white-space:nowrap;">${resp}</td>
+      <td style="font-size:12px;font-weight:500;max-width:220px;">${problema}</td>
+      <td style="font-size:12px;color:#E74C3C;max-width:190px;">${impacto}.</td>
+      <td style="font-size:12px;color:var(--color-text-secondary);max-width:280px;">${accion}</td>
+      <td><span class="badge" style="background:${dim.bg};color:${dim.c};font-weight:600;white-space:nowrap;">${dim.d}</span></td>
     </tr>`;
   }).join('');
 
   document.getElementById('ml').innerHTML=`
     <div class="insight" style="margin-bottom:12px;line-height:1.6;">
-      Análisis generado automáticamente a partir de <strong>${D.length} registros</strong> (${meses.join(', ')}).
-      Se actualiza solo al agregar nuevos datos en la pestaña Registro.
+      Análisis generado automáticamente a partir de <strong>${D.length} registros</strong> (${meses.join(', ')}) bajo metodología <strong>Lean Six Sigma</strong>:
+      cada acción busca reducir costo, disminuir variabilidad del proceso (CV%), mejorar calidad y elevar la satisfacción del cliente interno —
+      con el fin de lograr procesos más consistentes y predecibles. Se actualiza solo al agregar nuevos datos en la pestaña Registro.
     </div>
     <div class="tw">
       <table>
-        <thead><tr><th>#</th><th>Prioridad</th><th>Problema</th><th>Impacto</th><th>Acción recomendada</th><th>Responsable</th></tr></thead>
+        <thead><tr><th>#</th><th>Prioridad</th><th>Problema</th><th>Impacto</th><th>Acción recomendada (Lean Six Sigma)</th><th>Enfoque</th></tr></thead>
         <tbody>${filasHTML}</tbody>
       </table>
     </div>
@@ -1609,6 +1684,7 @@ function tar(){
   const record={
     id:ntid++,
     mes:document.getElementById('tnm').value,
+    anio:document.getElementById('tnanio').value,
     congelado:isNaN(c)?null:c,
     refrigerado:isNaN(r)?null:r,
     personas:parseInt(document.getElementById('tnp').value)||null,
@@ -2043,7 +2119,7 @@ function generarPDF(){
     doc.setDrawColor(220,220,225); doc.setLineWidth(0.3);
     doc.line(12,pageH-16,pageW-12,pageH-16);
     doc.setFontSize(7.5); doc.setTextColor(...gris); doc.setFont(undefined,'normal');
-    doc.text('Elaborado por: Mario Alexander Cachupe Santos — Ingeniero de Operaciones, Supply Chain',12,pageH-11);
+    doc.text('Elaborado por: Analista de Procesos — Supply Chain',12,pageH-11);
     doc.text('Centro de Distribución Taco Bell Guatemala — Sistema de Control de Tiempos Operativos',12,pageH-7.5);
     doc.text(`Generado el ${fechaHoy()}`,pageW-12,pageH-7.5,{align:'right'});
 
@@ -2062,3 +2138,6 @@ initFirebase();
 </script>
 </body>
 </html>
+    
+
+
